@@ -6,8 +6,8 @@
  License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
  
  This example code uses bogde's excellent library: https://github.com/bogde/HX711
- SparkFun spends a lot of time and energy building hardware and writing code. Please consider 
- supporting SparkFun by buying a product or kit.
+ SparkFun spends a lot of time and energy building open source hardware and writing public domain code. 
+ Please consider supporting SparkFun by buying a product or kit.
  
  Serial Load Cell Converter is a simple board that allows a user to read and configure all types of load cells.
  It relies on the HX711 load cell amplifier.
@@ -45,7 +45,6 @@
  Get version numbers into a define - help menu, setup, 
  Change the read range from 100s of lbs to grams or micrograms.
  Make zero range changeable by user
- Allow user to set number of readings for an average
 
  */
 
@@ -53,6 +52,8 @@
 #include "slcc.h" //Contains EPPROM locations
 
 #include <EEPROM.h>
+
+#define FIRMWARE_VERSION "1.0"
 
 const byte statled1 = 13;  //Flashes with incoming serial traffic
 
@@ -62,9 +63,9 @@ unsigned int setting_report_rate;
 long setting_calibration_factor; //Value used to convert the load cell reading to lbs or kg
 long setting_tare_point; //Zero value that is found when scale is tared 
 boolean setting_time_stamp; //Prints the number of miliseconds since boot next to weight reading
-
 byte setting_decimal_places; //How many decimals to display
-byte setting_average_amount = 4; //How many readings to take before reporting reading
+byte setting_average_amount; //How many readings to take before reporting reading
+
 byte setting_zero_window = 1; //
 
 const byte escape_character = 'q'; //This is the ASCII character we look for to break logging
@@ -86,7 +87,7 @@ void setup()
 
   //Setup UART
   Serial.begin(setting_uart_speed);
-  Serial.println("Serial Load Cell Converter v1.0");
+  Serial.println("Serial Load Cell Converter");
   Serial.println("By SparkFun Electronics");
 
   check_emergency_reset(); //Look to see if the RX pin is being pulled low
@@ -170,7 +171,9 @@ void system_setup(void)
 {
   while(1)
   {
-    Serial.println(F("\r\nSystem Configuration"));
+    Serial.print(F("\r\nSerial Load Cell Converter version: "));
+    Serial.println(F(FIRMWARE_VERSION));
+    Serial.println(F("System Configuration"));
 
     Serial.print(F("1) Tare scale to zero ["));
     Serial.print(setting_tare_point);

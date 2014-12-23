@@ -1,3 +1,6 @@
+//Arduino pin connections to the DAT and CLK pins on the HX711 IC
+#define DAT  3
+#define CLK  2
 
 //Internal EEPROM locations for user settings
 #define LOCATION_MASS_UNITS             0x01
@@ -22,10 +25,6 @@
 //Arduino doesn't properly handle bauds lower than 500bps
 #define BAUD_MIN  2400
 #define BAUD_MAX  1000000
-
-//Arduino pin connections to the DAT and CLK pins on the HX711 IC
-#define DAT  3
-#define CLK  2
 
 #define UNITS_KG  0
 #define UNITS_LBS 1
