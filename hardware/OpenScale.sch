@@ -23862,6 +23862,7 @@ Connection</text>
 <text x="238.76" y="129.54" size="1.778" layer="97" rot="MR0">Low noise regulator</text>
 <text x="134.62" y="121.92" size="1.778" layer="97">Optional External
 Serial Interface</text>
+<text x="182.88" y="33.02" size="1.778" layer="91">Change to 1k on blue led</text>
 </plain>
 <instances>
 <instance part="GND2" gate="1" x="121.92" y="35.56"/>
