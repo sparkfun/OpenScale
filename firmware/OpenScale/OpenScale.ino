@@ -1,5 +1,5 @@
 /*
- A serial interface for reading and configuring load cells.
+ OpenScale: A serial interface for reading and configuring load cells.
  By: Nathan Seidle
  SparkFun Electronics
  Date: November 24th, 2014
@@ -9,7 +9,7 @@
  SparkFun spends a lot of time and energy building open source hardware and writing public domain code. 
  Please consider supporting SparkFun by buying a product or kit.
  
- Serial Load Cell Converter is a simple board that allows a user to read and configure all types of load cells.
+ OpenScale is a simple board that allows a user to read and configure all types of load cells.
  It relies on the HX711 load cell amplifier.
  
  How to use: 
@@ -22,41 +22,43 @@
  factor until scale reads out the calibration weight.
  7) Press x and test your scale
  
- SLCC ships with an Arduino/Optiboot 115200bps serial bootloader running at 16MHz so you can load new firmware 
+ OpenScale ships with an Arduino/Optiboot 115200bps serial bootloader running at 16MHz so you can load new firmware 
  with a simple serial connection.
  
- SLCC runs at 9600bps by default. This is configurable to 1200, 2400, 4800, 9600, 19200, 38400, 57600, and 115200bps. 
+ OpenScale runs at 9600bps by default. This is configurable to 1200, 2400, 4800, 9600, 19200, 38400, 57600, and 115200bps. 
  
- Type '?' to get a list of supported commands.
- 	
- After power up SLCC will try reading the load cell and output a weight value.
+ After power up OpenScale will try reading the load cell and output a weight value.
  
- If you get SLCC stuck into an unknown baudrate, there is a safety mechanism built-in. Tie the RX pin 
- to ground and power up SLCC. You should see the LEDs blink back and forth for 2 seconds, then blink 
- in unison. Now power down SLCC and remove the RX/GND jumper. SLCC is now reset to 9600bps.
+ If you get OpenScale stuck into an unknown baudrate, there is a safety mechanism built-in. Tie the RX pin 
+ to ground and power up OpenScale. You should see the LEDs blink back and forth for 2 seconds, then blink 
+ in unison. Now power down OpenScale and remove the RX/GND jumper. OpenScale is now reset to 9600bps.
  
  Type 'set' to enter baud rate configuration menu. Select the baud rate and press enter. You will then 
  see a message 'Going to 9600bps...' or some such message. You will need to power down OpenLog, change 
  your system UART settings to match the new OpenLog baud rate and then power OpenLog back up.
  
- STAT1 LED / D5 - flashes when character is received
+ STAT LED / D13 - flashes when character is received
  
+ If you're using this firmware with the HX711 breakout and an Uno here are the pins to hook up:
+ Arduino pin 2 -> HX711 CLK
+ 3 -> DAT
+ 5V -> VCC
+ GND -> GND
+
  TODO:
- Get version numbers into a define - help menu, setup, 
  Change the read range from 100s of lbs to grams or micrograms.
  Make zero range changeable by user
-
 
  */
 
 #include "HX711.h"
-#include "slcc.h" //Contains EPPROM locations
+#include "openscale.h" //Contains EPPROM locations for settings
 
 #include <EEPROM.h>
 
 #define FIRMWARE_VERSION "1.0"
 
-const byte statled1 = 13;  //Flashes with incoming serial traffic
+const byte statusLED = 13;  //Flashes with each reading
 
 long setting_uart_speed; //This is the baud rate that the system runs at, default is 9600. Can be 1,200 to 1,000,000
 byte setting_units; //Lbs or kg?
@@ -75,7 +77,7 @@ HX711 scale(DAT, CLK); //Setup interface to scale
 
 void setup()
 {
-  pinMode(statled1, OUTPUT);
+  pinMode(statusLED, OUTPUT);
 
   //During testing reset everything
   //for(int x = 0 ; x < 20 ; x++)
@@ -90,6 +92,9 @@ void setup()
   Serial.begin(setting_uart_speed);
   Serial.println("Serial Load Cell Converter");
   Serial.println("By SparkFun Electronics");
+  Serial.print("Press ");
+  Serial.print((char)escape_character);
+  Serial.println(" to bring up settings.");
 
   check_emergency_reset(); //Look to see if the RX pin is being pulled low
 
@@ -103,7 +108,7 @@ void setup()
   
   //Look for a weird case where the report rate time is less than the allowed minimum
   if(setting_report_rate < minTime) setting_report_rate = minTime;
-  
+
   Serial.println("Readings:");
 }
 
@@ -132,22 +137,20 @@ void loop()
   Serial.print(F(","));
   if(setting_units == UNITS_LBS) Serial.print(F("lbs"));
   if(setting_units == UNITS_KG) Serial.print(F("kg"));
-//  Serial.println();
-  blinkLED(statled1);
+
+  toggleLED();
 
   //If we see escape char then drop to setup menu
   if(Serial.available())
   {
-    blinkLED(statled1);
+    toggleLED();
     char incoming = Serial.read();
     if(incoming == escape_character) system_setup();
   }
 
   //Hang out until the end of this report period
   while( (millis() - startTime) < setting_report_rate)
-  {
     delay(1);
-  }
   
   /*float delta = lastReading - currentReading;
   lastReading = currentReading;
@@ -167,12 +170,12 @@ void loop()
 }
 
 
-//Configure how SLCC operates
+//Configure how OpenScale operates
 void system_setup(void)
 {
   while(1)
   {
-    Serial.print(F("\r\nSerial Load Cell Converter version: "));
+    Serial.print(F("\r\nSerial Load Cell Converter version "));
     Serial.println(F(FIRMWARE_VERSION));
     Serial.println(F("System Configuration"));
 
@@ -217,7 +220,7 @@ void system_setup(void)
     while(!Serial.available()) ; //Wait for user to type a character
     char command = Serial.read();
 
-    blinkLED(statled1);
+    toggleLED();
 
     //Execute command
     if(command == '1')
@@ -488,7 +491,7 @@ void calibrate_scale(void)
 
     if(Serial.available())
     {
-      //blinkLED(statled1); //Blink serial indicator
+      //toggledLED(); //Blink serial indicator
 
       //Check to see if user is holding down the button
       long delta = millis() - lastChange;
@@ -591,7 +594,12 @@ void rate_setup(void)
       if(temp == '+' || temp == 'a')
         setting_report_rate += changeRate;
       else if(temp == '-' || temp == 'z')
-        setting_report_rate -= changeRate;
+      {
+        if(changeRate > setting_report_rate) //Catch a case where we could go negative
+          setting_report_rate = 0;
+        else
+          setting_report_rate -= changeRate;
+      }
       else if(temp == 'x')
         break;
 
@@ -608,13 +616,13 @@ void rate_setup(void)
   record_system_settings();
 }
 
-//Given a pin number with an LED on it, blink it briefly
-void blinkLED(byte LED)
+//Toggle the status LED
+void toggleLED()
 {
-  digitalWrite(LED, HIGH);
-  delay(25);
-  digitalWrite(LED, LOW);
-  delay(25);
+  if(digitalRead(statusLED))
+    digitalWrite(statusLED, LOW);
+  else
+    digitalWrite(statusLED, HIGH);
 }
 
 //Check to see if we need an emergency UART reset
@@ -631,15 +639,14 @@ void check_emergency_reset(void)
   Serial.println("Reset!");
 
   //Wait 2 seconds, blinking LED while we wait
-  pinMode(statled1, OUTPUT);
-  digitalWrite(statled1, LOW); //Set the STAT1 LED
+  pinMode(statusLED, OUTPUT);
+  digitalWrite(statusLED, LOW); //Set the STAT1 LED
 
   for(byte i = 0 ; i < 80 ; i++)
   {
     delay(25);
 
-    if(digitalRead(statled1) == LOW) digitalWrite(statled1, HIGH);
-    else digitalWrite(statled1, LOW);
+    toggleLED();
 
     if(digitalRead(0) == HIGH) return; //Check to see if RX is not low anymore
   }		
@@ -647,17 +654,11 @@ void check_emergency_reset(void)
   //If we make it here, then RX pin stayed low the whole time
   set_default_settings(); //Reset baud, escape characters, escape number, system mode
 
-  pinMode(statled1, OUTPUT);
-  digitalWrite(statled1, HIGH);
-
   //Now sit in forever loop indicating system is now at 9600bps
   while(1)
   {
     delay(500);
-
-    //Blink stat LEDs
-    if(digitalRead(statled1) == LOW) digitalWrite(statled1, HIGH);
-    else digitalWrite(statled1, LOW);
+    toggleLED();
   }
 }
 
@@ -820,9 +821,8 @@ byte read_line(char* buffer, byte buffer_length)
     while (!Serial.available());
     byte c = Serial.read();
 
-    if(digitalRead(statled1) == LOW) digitalWrite(statled1, HIGH);
-    else digitalWrite(statled1, LOW);
-
+    toggleLED(); //Blink status LED with each character received
+    
     if(c == 0x08 || c == 0x7f) { //Backspace characters
       if(read_length < 1)
         continue;

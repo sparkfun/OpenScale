@@ -20847,7 +20847,10 @@ This USB2.0 Full Speed  IC offers a compact bridge to full handshake UART interf
 <connect gate="U$1" pin="VCC@6" pad="6"/>
 </connects>
 <technologies>
-<technology name=""/>
+<technology name="">
+<attribute name="PROD_ID" value="IC-09069" constant="no"/>
+<attribute name="VALUE" value="ATMEGA328P_TQFP" constant="no"/>
+</technology>
 </technologies>
 </device>
 </devices>
@@ -23807,7 +23810,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="GND13" library="SparkFun" deviceset="GND" device=""/>
 <part name="R11" library="SparkFun-Resistors" deviceset="1KOHM-1/10W-1%(0603)" device="" value="1K"/>
 <part name="R12" library="SparkFun-Resistors" deviceset="1KOHM-1/10W-1%(0603)" device="" value="1K"/>
-<part name="U4" library="SparkFun-DigitalIC" deviceset="ATMEGA328P_TQFP" device=""/>
+<part name="U4" library="SparkFun-DigitalIC" deviceset="ATMEGA328P_TQFP" device="" value="ATMEGA328P_TQFP"/>
 </parts>
 <sheets>
 <sheet>
