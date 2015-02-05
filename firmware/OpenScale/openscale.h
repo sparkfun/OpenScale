@@ -1,6 +1,6 @@
 //Arduino pin connections to the DAT and CLK pins on the HX711 IC
-#define DAT  3
-#define CLK  2
+#define DAT  2
+#define CLK  3
 
 //Internal EEPROM locations for user settings
 #define LOCATION_MASS_UNITS             0x01

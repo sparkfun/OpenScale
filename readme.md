@@ -1,9 +1,9 @@
-HX711 Load Cell Amplifier
+OpenScale
 =======
 
 ![Amplifier Layout](https://raw.githubusercontent.com/sparkfun/1.jpg)
 
-This is a breakout board for the HX711 amplifier IC to easily use load cells to measure weight.
+OpenScale is an open source hardware load cell reader and calibration device. It has the ability to read multiple types of load cells and offers a simple to use serial menu to configure calibration value, sample rate, time stamp, and units of precision.
 
 License Information
 -------------------

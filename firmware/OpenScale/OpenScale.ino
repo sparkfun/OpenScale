@@ -497,7 +497,7 @@ void calibrate_scale(void)
       long delta = millis() - lastChange;
       lastChange = millis();
       
-      if(delta > 100) //Slow, just 1 and reset holdDown counter
+      if(delta > 500) //Slow, increment just 1 and reset holdDown counter
       {
         changeRate = 1;
         holdDownCounter = 0;
@@ -506,14 +506,14 @@ void calibrate_scale(void)
       {
         changeRate = 10;
         holdDownCounter++;
-        if(holdDownCounter > 60)
+        if(holdDownCounter > 25)
         {
           holdDownCounter = 100; //Don't let this get too big
           changeRate = 100; //Change faster
         }
-        else if(holdDownCounter > 25)
+        else if(holdDownCounter > 10)
         {
-          changeRate = 25; //Change faster
+          changeRate = 100; //Change faster
         }
       }
 
