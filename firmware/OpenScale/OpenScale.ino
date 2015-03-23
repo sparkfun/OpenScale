@@ -4,41 +4,42 @@
  SparkFun Electronics
  Date: November 24th, 2014
  License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
- 
+
  This example code uses bogde's excellent library: https://github.com/bogde/HX711
- SparkFun spends a lot of time and energy building open source hardware and writing public domain code. 
+ SparkFun spends a lot of time and energy building open source hardware and writing public domain code.
  Please consider supporting SparkFun by buying a product or kit.
- 
+
  OpenScale is a simple board that allows a user to read and configure all types of load cells.
  It relies on the HX711 load cell amplifier.
- 
- How to use: 
+
+ How to use:
  1) Wire your load cell to the board using the 4-pin connection (E+/-, A+/-) or the RJ11 connection.
  2) Attach board to USB and open terminal at 9600bps
  3) Press q to bring up settings menu
  4) Select units LBS/KG
  5) Tare the scale with no weight on the scale
- 6) Calibrate the scale: Remove an weight, start calibration routine, place weight on scale, adjust calibration 
+ 6) Calibrate the scale: Remove an weight, start calibration routine, place weight on scale, adjust calibration
  factor until scale reads out the calibration weight.
  7) Press x and test your scale
- 
- OpenScale ships with an Arduino/Optiboot 115200bps serial bootloader running at 16MHz so you can load new firmware 
- with a simple serial connection.
- 
- OpenScale runs at 9600bps by default. This is configurable to 1200, 2400, 4800, 9600, 19200, 38400, 57600, and 115200bps. 
- 
+
+ OpenScale ships with an Arduino/Optiboot 115200bps serial bootloader running at 16MHz so you can load new firmware
+ with a simple serial connection. Select 'Arduino Uno' under the boards menu to reprogram the board.
+
+ OpenScale runs at 9600bps by default. This is configurable to 1200, 2400, 4800, 9600, 19200, 38400, 57600, and 115200bps.
+
  After power up OpenScale will try reading the load cell and output a weight value.
- 
- If you get OpenScale stuck into an unknown baudrate, there is a safety mechanism built-in. Tie the RX pin 
- to ground and power up OpenScale. You should see the LEDs blink back and forth for 2 seconds, then blink 
- in unison. Now power down OpenScale and remove the RX/GND jumper. OpenScale is now reset to 9600bps.
- 
- Type 'set' to enter baud rate configuration menu. Select the baud rate and press enter. You will then 
- see a message 'Going to 9600bps...' or some such message. You will need to power down OpenLog, change 
- your system UART settings to match the new OpenLog baud rate and then power OpenLog back up.
- 
+
+ If you get OpenScale stuck into an unknown baudrate, there is a safety mechanism built-in. Tie the RX pin
+ to ground and power up OpenScale. You should see the status LED blink at 1Hz for 2 seconds. 
+ Now power down OpenScale and remove the RX/GND jumper. OpenScale is now reset to 9600bps.
+
+ To change the baud rate type 'x' to bring up configuration menu. Select the baud rate sub menu and enter
+ the baud rate of your choice. You will then see a message for example 'Going to 9600bps...'. 
+ You will need to power down OpenScale, change your system UART settings to match the new OpenScale
+ baud rate and then power OpenScale back up.
+
  STAT LED / D13 - flashes when character is received
- 
+
  If you're using this firmware with the HX711 breakout and an Uno here are the pins to hook up:
  Arduino pin 2 -> HX711 CLK
  3 -> DAT
@@ -49,12 +50,35 @@
  Change the read range from 100s of lbs to grams or micrograms.
  Make zero range changeable by user
 
+ Unit Tests:
+ test DS18B20 over ethernet cable to load combinator
+
+
+ Testing:
+ 10.0968 - 8:20AM
+ 10.4319 - 3:05PM
+
+ Phidgets moved 0.4lbs over 24hrs
+ 10.1 8AM
+ 10.44 8:45PM
+ 10.55 7:40AM
+
+ Scale after coke on it for 24 hours
+ 10.06 7:45AM
+ 9.97 8:12AM
+ 9.96 7:58AM the following morning
+ Looks like we can get to a static point. Seems to be... break in? on the load cell
+
+
+
+
  */
 
-#include "HX711.h"
+#include "HX711.h" //Library created by bogde
 #include "openscale.h" //Contains EPPROM locations for settings
-
-#include <EEPROM.h>
+#include <Wire.h> //Needed to talk to on board TMP102 temp sensor
+#include <EEPROM.h> //Needed to record user settings
+#include <OneWire.h> //Needed to read DS18B20 temp sensors
 
 #define FIRMWARE_VERSION "1.0"
 
@@ -64,52 +88,77 @@ long setting_uart_speed; //This is the baud rate that the system runs at, defaul
 byte setting_units; //Lbs or kg?
 unsigned int setting_report_rate;
 long setting_calibration_factor; //Value used to convert the load cell reading to lbs or kg
-long setting_tare_point; //Zero value that is found when scale is tared 
-boolean setting_time_stamp; //Prints the number of miliseconds since boot next to weight reading
+long setting_tare_point; //Zero value that is found when scale is tared
+boolean setting_timestamp; //Prints the number of miliseconds since boot next to weight reading
 byte setting_decimal_places; //How many decimals to display
 byte setting_average_amount; //How many readings to take before reporting reading
+boolean setting_local_temp_enable; //Prints the local temperature in C
+boolean setting_remote_temp_enable; //Prints the remote temperature in C
 
 byte setting_zero_window = 1; //
 
-const byte escape_character = 'q'; //This is the ASCII character we look for to break logging
+const byte escape_character = 'x'; //This is the ASCII character we look for to break logging
 
 HX711 scale(DAT, CLK); //Setup interface to scale
+
+OneWire remoteSensor(4);  //Setup reading one wire temp sensor on pin 4 (a 4.7K resistor is necessary)
+byte remoteSensorAddress[8];
+boolean remoteSensorAttached = false;
 
 void setup()
 {
   pinMode(statusLED, OUTPUT);
 
   //During testing reset everything
-  //for(int x = 0 ; x < 20 ; x++)
+  //for(int x = 0 ; x < 30 ; x++)
   //{
   //  EEPROM.write(x, 0xFF);
   //}
 
   Serial.begin(9600);
-  read_system_settings(); //Load all system settings from EEPROM
+
+  Wire.begin();
+
+  readSystemSettings(); //Load all system settings from EEPROM
+
+  pinMode(AMP_EN, OUTPUT);
+  enableHX711();
 
   //Setup UART
   Serial.begin(setting_uart_speed);
-  Serial.println("Serial Load Cell Converter");
-  Serial.println("By SparkFun Electronics");
-  Serial.print("Press ");
-  Serial.print((char)escape_character);
-  Serial.println(" to bring up settings.");
+  Serial.println(F("Serial Load Cell Converter"));
+  Serial.println(F("By SparkFun Electronics"));
 
-  check_emergency_reset(); //Look to see if the RX pin is being pulled low
+  checkEmergencyReset(); //Look to see if the RX pin is being pulled low
 
   scale.set_scale(setting_calibration_factor); //Calibrate scale from EEPROM value
   scale.set_offset(setting_tare_point); //Zero out the scale using a previously known zero point
 
+  //Look to see if we have an external or remote temp sensor attached
+  if (remoteSensor.search(remoteSensorAddress) == 0)
+  {
+    remoteSensorAttached = false;
+    Serial.println(F("No remote sensor found."));
+  }
+  else
+  {
+    remoteSensorAttached = true;
+    Serial.println(F("Remote temperature sensor detected"));
+  }
+
   //Calculate the minimum time between reports
   int minTime = calcMinimumReadTime();
-  Serial.print("Minimum time between reports: ");
+  Serial.print(F("Minimum time between reports: "));
   Serial.println(minTime);
-  
-  //Look for a weird case where the report rate time is less than the allowed minimum
-  if(setting_report_rate < minTime) setting_report_rate = minTime;
 
-  Serial.println("Readings:");
+  //Look for a weird case where the report rate time is less than the allowed minimum
+  if (setting_report_rate < minTime) setting_report_rate = minTime;
+
+  Serial.print(F("Press "));
+  Serial.print((char)escape_character);
+  Serial.println(F(" to bring up settings."));
+
+  Serial.println(F("Readings:"));
 }
 
 long numberOfReadings = 0;
@@ -121,46 +170,81 @@ void loop()
   long startTime = millis();
 
   //Print time stamp
-  if(setting_time_stamp == true)
+  if (setting_timestamp == true)
   {
     Serial.print(startTime);
     Serial.print(F(","));
   }
 
+  //Print local temp
+  if (setting_local_temp_enable == true)
+  {
+    Serial.print(getLocalTemperature());
+    Serial.print(F(","));
+  }
+
+  //Print remote temp
+  if (setting_remote_temp_enable == true)
+  {
+    if (remoteSensorAttached == true)
+    {
+      Serial.print(getRemoteTemperature());
+      Serial.print(F(","));
+    }
+    else
+    {
+      Serial.print(F("0,")); //There is no sensor to check
+    }
+  }
+
   //Take average of readings
+  enableHX711();
+  //delay(500);
+  scale.set_scale(setting_calibration_factor); //Calibrate scale from EEPROM value
+  scale.set_offset(setting_tare_point); //Zero out the scale using a previously known zero point
+
   float currentReading = scale.get_units(setting_average_amount);
-  
+  disableHX711();
+
   //Zero out reading if it is too close to zero
   //if(abs(currentReading) < setting_zero_window) currentReading = 0;
-  
+
   Serial.print(currentReading, setting_decimal_places);
   Serial.print(F(","));
-  if(setting_units == UNITS_LBS) Serial.print(F("lbs"));
-  if(setting_units == UNITS_KG) Serial.print(F("kg"));
+  if (setting_units == UNITS_LBS) Serial.print(F("lbs"));
+  if (setting_units == UNITS_KG) Serial.print(F("kg"));
 
   toggleLED();
 
-  //If we see escape char then drop to setup menu
-  if(Serial.available())
+  //Hang out until the end of this report period
+  while (1)
   {
-    toggleLED();
-    char incoming = Serial.read();
-    if(incoming == escape_character) system_setup();
+    //If we see escape char then drop to setup menu
+    if (Serial.available())
+    {
+      toggleLED();
+      char incoming = Serial.read();
+      if (incoming == escape_character)
+      {
+        enableHX711();
+        system_setup();
+        disableHX711();
+      }
+    }
+
+    if ((millis() - startTime) >= setting_report_rate) break;
+    delayMicroseconds(100);
   }
 
-  //Hang out until the end of this report period
-  while( (millis() - startTime) < setting_report_rate)
-    delay(1);
-  
   /*float delta = lastReading - currentReading;
   lastReading = currentReading;
-  
+
   totalReadings += delta;
 
   numberOfReadings++;
-  
+
   float avgDelta = totalReadings / numberOfReadings;
-  
+
   Serial.print(" Delta: ");
   Serial.print(delta, 3);
   Serial.print(" avgDelta: ");
@@ -173,7 +257,7 @@ void loop()
 //Configure how OpenScale operates
 void system_setup(void)
 {
-  while(1)
+  while (1)
   {
     Serial.print(F("\r\nSerial Load Cell Converter version "));
     Serial.println(F(FIRMWARE_VERSION));
@@ -183,13 +267,13 @@ void system_setup(void)
     Serial.print(setting_tare_point);
     Serial.println(F("]"));
 
-    Serial.print(F("2) Calibrate Scale ["));
+    Serial.print(F("2) Calibrate scale ["));
     Serial.print(setting_calibration_factor);
     Serial.println(F("]"));
 
-    Serial.print(F("3) Time Stamp ["));
-    if(setting_time_stamp == true) Serial.print(F("On"));
-    if(setting_time_stamp == false) Serial.print(F("Off"));
+    Serial.print(F("3) Timestamp ["));
+    if (setting_timestamp == true) Serial.print(F("On"));
+    else Serial.print(F("Off"));
     Serial.println(F("]"));
 
     Serial.print(F("4) Set report rate ["));
@@ -201,8 +285,8 @@ void system_setup(void)
     Serial.println(F(" bps]"));
 
     Serial.print(F("6) Change units of measure ["));
-    if(setting_units == UNITS_KG) Serial.print(F("kg"));
-    if(setting_units == UNITS_LBS) Serial.print(F("lbs"));
+    if (setting_units == UNITS_KG) Serial.print(F("kg"));
+    if (setting_units == UNITS_LBS) Serial.print(F("lbs"));
     Serial.println(F("]"));
 
     Serial.print(F("7) Decimals ["));
@@ -213,17 +297,27 @@ void system_setup(void)
     Serial.print(setting_average_amount);
     Serial.println(F("]"));
 
+    Serial.print(F("9) Local temp ["));
+    if (setting_local_temp_enable == true) Serial.print(F("On"));
+    else Serial.print(F("Off"));
+    Serial.println(F("]"));
+
+    Serial.print(F("r) Remote temp ["));
+    if (setting_remote_temp_enable == true) Serial.print(F("On"));
+    else Serial.print(F("Off"));
+    Serial.println(F("]"));
+
     Serial.println(F("x) Exit"));
     Serial.print(F(">"));
 
     //Read command
-    while(!Serial.available()) ; //Wait for user to type a character
+    while (!Serial.available()) ; //Wait for user to type a character
     char command = Serial.read();
 
     toggleLED();
 
     //Execute command
-    if(command == '1')
+    if (command == '1')
     {
       //This can be used to remove the need to tare the scale.
       //Useful in permanent scale projects.
@@ -237,44 +331,44 @@ void system_setup(void)
 
       record_system_settings();
     }
-    else if(command == '2')
+    else if (command == '2')
     {
       calibrate_scale();
     }
-    else if(command == '3')
+    else if (command == '3')
     {
-      Serial.print(F("\n\rTime stamp set to "));
-      if(setting_time_stamp == true)
+      Serial.print(F("\n\rTimestamp "));
+      if (setting_timestamp == true)
       {
-        Serial.println(F("false"));
-        setting_time_stamp = false;
+        Serial.println(F("off"));
+        setting_timestamp = false;
       }
       else
       {
-        Serial.println(F("true"));
-        setting_time_stamp = true;
+        Serial.println(F("on"));
+        setting_timestamp = true;
       }
       record_system_settings();
     }
-    else if(command == '4')
+    else if (command == '4')
     {
       rate_setup();
     }
-    else if(command == '5')
+    else if (command == '5')
     {
       baud_setup();
     }
-    else if(command == '6')
+    else if (command == '6')
     {
       Serial.print(F("\n\rUnits set to "));
-      if(setting_units == UNITS_KG)
+      if (setting_units == UNITS_KG)
       {
         Serial.println(F("lbs"));
         setting_units = UNITS_LBS;
         float newFactor = (float)setting_calibration_factor * 0.453592; //Convert the calibration factor from kg to lbs
         setting_calibration_factor = (long)newFactor;
       }
-      else if(setting_units == UNITS_LBS)
+      else if (setting_units == UNITS_LBS)
       {
         Serial.println(F("kg"));
         setting_units = UNITS_KG;
@@ -284,17 +378,47 @@ void system_setup(void)
 
       scale.set_scale(setting_calibration_factor); //Assign this new factor to the scale
       record_system_settings();
-      
+
     }
-    else if(command == '7')
+    else if (command == '7')
     {
       decimal_setup();
     }
-    else if(command == '8')
+    else if (command == '8')
     {
       average_reading_setup();
     }
-    else if(command == 'x')
+    else if (command == '9')
+    {
+      Serial.print(F("\n\rLocal temp "));
+      if (setting_local_temp_enable == true)
+      {
+        Serial.println(F("off"));
+        setting_local_temp_enable = false;
+      }
+      else
+      {
+        Serial.println(F("on"));
+        setting_local_temp_enable = true;
+      }
+      record_system_settings();
+    }
+    else if (command == 'r')
+    {
+      Serial.print(F("\n\Remote temp "));
+      if (setting_remote_temp_enable == true)
+      {
+        Serial.println(F("off"));
+        setting_remote_temp_enable = false;
+      }
+      else
+      {
+        Serial.println(F("on"));
+        setting_remote_temp_enable = true;
+      }
+      record_system_settings();
+    }
+    else if (command == 'x')
     {
       //Do nothing, just exit
       Serial.println(F("Exiting"));
@@ -315,21 +439,21 @@ void average_reading_setup(void)
   Serial.print(F("Number of readings: "));
   Serial.println(setting_average_amount);
 
-  while(1)
+  while (1)
   {
-    if(Serial.available())
+    if (Serial.available())
     {
       char temp = Serial.read();
-      
-      if(temp == '+' || temp == 'a')
+
+      if (temp == '+' || temp == 'a')
       {
-        if(setting_average_amount < 64) setting_average_amount++;
+        if (setting_average_amount < 64) setting_average_amount++;
       }
-      else if(temp == '-' || temp == 'z')
+      else if (temp == '-' || temp == 'z')
       {
-        if(setting_average_amount > 1) setting_average_amount--;
+        if (setting_average_amount > 1) setting_average_amount--;
       }
-      else if(temp == 'x')
+      else if (temp == 'x')
         break;
 
       Serial.print(F("Number of readings: "));
@@ -351,21 +475,21 @@ void decimal_setup(void)
   Serial.print(F("Decimal places: "));
   Serial.println(setting_decimal_places);
 
-  while(1)
+  while (1)
   {
-    if(Serial.available())
+    if (Serial.available())
     {
       char temp = Serial.read();
-      
-      if(temp == '+' || temp == 'a')
+
+      if (temp == '+' || temp == 'a')
       {
-        if(setting_decimal_places < 4) setting_decimal_places++;
+        if (setting_decimal_places < 4) setting_decimal_places++;
       }
-      else if(temp == '-' || temp == 'z')
+      else if (temp == '-' || temp == 'z')
       {
-        if(setting_decimal_places > 0) setting_decimal_places--;
+        if (setting_decimal_places > 0) setting_decimal_places--;
       }
-      else if(temp == 'x')
+      else if (temp == 'x')
         break;
 
       Serial.print(F("Decimal places: "));
@@ -394,7 +518,7 @@ void baud_setup(void)
   read_line(newBaud, sizeof(newBaud));
 
   //Look for escape character
-  if(newBaud[0] == 'x')
+  if (newBaud[0] == 'x')
   {
     Serial.println(F("Exiting"));
     return;
@@ -402,7 +526,7 @@ void baud_setup(void)
 
   long newRate = strtolong(newBaud); //Convert this string to a long
 
-  if(newRate < BAUD_MIN || newRate > BAUD_MAX)
+  if (newRate < BAUD_MIN || newRate > BAUD_MAX)
   {
     Serial.println(F("Out of bounds"));
   }
@@ -424,6 +548,7 @@ void baud_setup(void)
 
 //Determine how much time we need between measurements
 //Takes into account current baud rate
+//Takes into account the time to read various sensors
 int calcMinimumReadTime(void)
 {
   //The first few reads take too little time
@@ -432,31 +557,53 @@ int calcMinimumReadTime(void)
 
   //Now do an average
   long startTime = millis();
-  for(byte x = 0 ; x < 8 ; x++)
+  for (byte x = 0 ; x < 8 ; x++)
     scale.get_units(); //Do a dummy read and time it
   int averageReadTime = (millis() - startTime) / 8;
-  
-  averageReadTime *= setting_average_amount; //Increase this time by the number of system reads we want to do
+
+  int sensorReadTime = averageReadTime * setting_average_amount; //In ms, increase this time by the number of system reads we want to do
 
   //Assume we will need to print a minimum of 7 characters at this baud rate per loop
   //1 / 9600 = 1ms * 10bits per byte = 9.6ms per byte
   float characterTime = 10000 / (float)setting_uart_speed;
 
   //Calculate number of characters per report
-  //"51588595,178.899,lbs"
-  int characters = strlen("123.,"); //Basic case
+  int characters = 0;
+  if(setting_timestamp == true) characters += strlen("51588595,"); //14.33 hours
 
-  characters += setting_decimal_places; //For example this would pickup 3 of '17.123'
+  if(setting_local_temp_enable)
+  {
+    long startTime = millis();
+    for (byte x = 0 ; x < 8 ; x++)
+      getLocalTemperature(); //Do a dummy read and time it
+    averageReadTime = ceil((millis() - startTime) / (float)8);
+    sensorReadTime += averageReadTime; //In ms
+    
+    characters += strlen("24.75,"); //Add the time it takes to print the characters as well
+  }
+  
+  if(setting_remote_temp_enable)
+  {
+    long startTime = millis();
+    for (byte x = 0 ; x < 8 ; x++)
+      getRemoteTemperature(); //Do a dummy read and time it
+    averageReadTime = ceil((millis() - startTime) / (float)8);
+    sensorReadTime += averageReadTime; //In ms
+
+    characters += strlen("27.81,"); //Add the time it takes to print the characters as well
+  }
+
+  characters += strlen("123,"); //Basic weight without decimals
+
+  if(setting_decimal_places > 0) characters += setting_decimal_places + 1; //For example 4: 3 decimal places and the '.'
 
   if(setting_units == UNITS_LBS) characters += strlen("lbs");
   if(setting_units == UNITS_KG) characters += strlen("kg");
 
-  if(setting_time_stamp == true) characters += strlen("51588595,"); //14.33 hours
-
   //Serial.print("characterTime: ");
   //Serial.println(ceil((float)characters * characterTime));
-  
-  return(averageReadTime + ceil((float)characters * characterTime)); 
+
+  return (sensorReadTime + ceil((float)characters * characterTime));
 }
 
 //Gives user the ability to set a known weight on the scale and calculate a calibration factor
@@ -475,7 +622,7 @@ void calibrate_scale(void)
   int changeRate = 1;
   int holdDownCounter = 0;
 
-  while(1)
+  while (1)
   {
     scale.set_scale(setting_calibration_factor); //Adjust to this calibration factor
 
@@ -483,21 +630,21 @@ void calibrate_scale(void)
     Serial.print(scale.get_units(setting_average_amount), 4); //Show 4 decimals during calibration
     //Serial.print(scale.get_units(setting_average_amount), setting_decimal_places);
     Serial.print(F(" "));
-    if(setting_units == UNITS_LBS) Serial.print(F("lbs"));
-    if(setting_units == UNITS_KG) Serial.print(F("kg"));
+    if (setting_units == UNITS_LBS) Serial.print(F("lbs"));
+    if (setting_units == UNITS_KG) Serial.print(F("kg"));
     Serial.print(F("]   Calibration Factor: "));
     Serial.print(setting_calibration_factor);
     Serial.println();
 
-    if(Serial.available())
+    if (Serial.available())
     {
       //toggledLED(); //Blink serial indicator
 
       //Check to see if user is holding down the button
       long delta = millis() - lastChange;
       lastChange = millis();
-      
-      if(delta > 500) //Slow, increment just 1 and reset holdDown counter
+
+      if (delta > 500) //Slow, increment just 1 and reset holdDown counter
       {
         changeRate = 1;
         holdDownCounter = 0;
@@ -506,26 +653,26 @@ void calibrate_scale(void)
       {
         changeRate = 10;
         holdDownCounter++;
-        if(holdDownCounter > 25)
+        if (holdDownCounter > 25)
         {
           holdDownCounter = 100; //Don't let this get too big
           changeRate = 100; //Change faster
         }
-        else if(holdDownCounter > 10)
+        else if (holdDownCounter > 10)
         {
           changeRate = 100; //Change faster
         }
       }
 
-      while(Serial.available())
+      while (Serial.available())
       {
         char temp = Serial.read();
-  
-        if(temp == '+' || temp == 'a')
+
+        if (temp == '+' || temp == 'a')
           setting_calibration_factor += changeRate;
-        else if(temp == '-' || temp == 'z')
+        else if (temp == '-' || temp == 'z')
           setting_calibration_factor -= changeRate;
-        else if(temp == 'x')
+        else if (temp == 'x')
         {
           //Record this new value to EEPROM
           record_system_settings();
@@ -542,36 +689,36 @@ void rate_setup(void)
 {
   //Calculate the minimum time between reports
   int minTime = calcMinimumReadTime();
-  
+
   Serial.println(F("Press + or a to increase time between reports"));
   Serial.println(F("Press - or z to decrease time between reports"));
   Serial.println(F("Press x to exit"));
 
   Serial.print(F("Minimum: "));
   Serial.print(minTime);
-  Serial.println("ms");
-  
-  if(setting_report_rate < minTime) setting_report_rate = minTime;
+  Serial.println(F("ms"));
+
+  if (setting_report_rate < minTime) setting_report_rate = minTime;
 
   Serial.print(F("Time: "));
   Serial.print(setting_report_rate);
-  Serial.println("ms");
+  Serial.println(F("ms"));
 
   long lastChange = millis();
   int changeRate = 1;
   int holdDownCounter = 0;
-  
-  while(1)
+
+  while (1)
   {
-    if(Serial.available())
+    if (Serial.available())
     {
       char temp = Serial.read();
-      
+
       //Check to see if user is holding down the button
       long delta = millis() - lastChange;
       lastChange = millis();
-      
-      if(delta > 100) //Slow, just change one at a time and reset holdDown counter
+
+      if (delta > 100) //Slow, just change one at a time and reset holdDown counter
       {
         changeRate = 1;
         holdDownCounter = 0;
@@ -580,35 +727,35 @@ void rate_setup(void)
       {
         changeRate = 10;
         holdDownCounter++;
-        if(holdDownCounter > 500)
+        if (holdDownCounter > 500)
         {
           holdDownCounter = 500; //Don't let this get too big
           changeRate = 500; //Change faster
         }
-        else if(holdDownCounter > 25)
+        else if (holdDownCounter > 25)
         {
           changeRate = 25; //Change faster
         }
       }
 
-      if(temp == '+' || temp == 'a')
+      if (temp == '+' || temp == 'a')
         setting_report_rate += changeRate;
-      else if(temp == '-' || temp == 'z')
+      else if (temp == '-' || temp == 'z')
       {
-        if(changeRate > setting_report_rate) //Catch a case where we could go negative
+        if (changeRate > setting_report_rate) //Catch a case where we could go negative
           setting_report_rate = 0;
         else
           setting_report_rate -= changeRate;
       }
-      else if(temp == 'x')
+      else if (temp == 'x')
         break;
 
-      if(setting_report_rate < minTime) setting_report_rate = minTime;
-      if(setting_report_rate > 50000) setting_report_rate = 50000; //Max of 50 seconds
+      if (setting_report_rate < minTime) setting_report_rate = minTime;
+      if (setting_report_rate > 50000) setting_report_rate = 50000; //Max of 50 seconds
 
       Serial.print(F("Time: "));
       Serial.print(setting_report_rate);
-      Serial.println("ms");
+      Serial.println(F("ms"));
     }
   }
 
@@ -619,46 +766,118 @@ void rate_setup(void)
 //Toggle the status LED
 void toggleLED()
 {
-  if(digitalRead(statusLED))
+  if (digitalRead(statusLED))
     digitalWrite(statusLED, LOW);
   else
     digitalWrite(statusLED, HIGH);
 }
 
+//Read the on board TMP102 digital temperature sensor
+//Return celsius
+//Code comes from bildr
+float getLocalTemperature()
+{
+  Wire.requestFrom(tmp102Address, 2);
+
+  byte MSB = Wire.read();
+  byte LSB = Wire.read();
+
+  //It's a 12bit int, using two's compliment for negative
+  int TemperatureSum = ((MSB << 8) | LSB) >> 4;
+
+  float celsius = TemperatureSum * 0.0625;
+  return celsius;
+}
+
+//Read the remote DS18B20 sensor
+//Return celsius
+//Code comes from PJRC: http://www.pjrc.com/teensy/td_libs_OneWire.html
+float getRemoteTemperature()
+{
+  //The DS18S20 is read slightly differently than the DS18B20
+  //The sealed sensors that SparkFun sells are DS18B20
+  //https://www.sparkfun.com/products/11050
+  boolean type_s = false;
+
+  remoteSensor.reset();
+  remoteSensor.select(remoteSensorAddress);
+  remoteSensor.write(0xBE);         // Read Scratchpad
+
+  byte data[12];
+  for (byte i = 0 ; i < 9 ; i++)           // we need 9 bytes
+    data[i] = remoteSensor.read();
+
+  // Convert the data to actual temperature
+  // because the result is a 16 bit signed integer, it should
+  // be stored to an "int16_t" type, which is always 16 bits
+  // even when compiled on a 32 bit processor.
+  int16_t raw = (data[1] << 8) | data[0];
+  if (type_s) {
+    raw = raw << 3; // 9 bit resolution default
+    if (data[7] == 0x10) {
+      // "count remain" gives full 12 bit resolution
+      raw = (raw & 0xFFF0) + 12 - data[6];
+    }
+  } else {
+    byte cfg = (data[4] & 0x60);
+    // at lower res, the low bits are undefined, so let's zero them
+    if (cfg == 0x00) raw = raw & ~7;  // 9 bit resolution, 93.75 ms
+    else if (cfg == 0x20) raw = raw & ~3; // 10 bit res, 187.5 ms
+    else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
+    //// default is 12 bit resolution, 750 ms conversion time
+  }
+
+  //This was moved to the end of the function. We will be calling this function many times so reset the 
+  //sensor and then tell it to do a temp conversion. This removes the need to delay for a sensor reading.
+  remoteSensor.reset();
+  remoteSensor.select(remoteSensorAddress); //The address is found at power on
+  remoteSensor.write(0x44, 1);        // start conversion, with parasite power on at the end
+
+  //750ms for 12-bit
+  //375ms for 11-bit
+  //187ms for 10-bit
+  //93ms for 9-bit
+  //delay(100);
+
+  float celsius = (float)raw / 16.0;
+  return (celsius);
+}
+
 //Check to see if we need an emergency UART reset
 //Scan the RX pin for 2 seconds
 //If it's low the entire time, then return 1
-void check_emergency_reset(void)
+void checkEmergencyReset(void)
 {
   pinMode(0, INPUT); //Turn the RX pin into an input
   digitalWrite(0, HIGH); //Push a 1 onto RX pin to enable internal pull-up
 
   //Quick pin check
-  if(digitalRead(0) == HIGH) return;
+  if (digitalRead(0) == HIGH) return;
 
-  Serial.println("Reset!");
+  Serial.println(F("Reset!"));
 
   //Wait 2 seconds, blinking LED while we wait
   pinMode(statusLED, OUTPUT);
   digitalWrite(statusLED, LOW); //Set the STAT1 LED
 
-  for(byte i = 0 ; i < 80 ; i++)
+  for (byte i = 0 ; i < 80 ; i++)
   {
     delay(25);
 
     toggleLED();
 
-    if(digitalRead(0) == HIGH) return; //Check to see if RX is not low anymore
-  }		
+    if (digitalRead(0) == HIGH) return; //Check to see if RX is not low anymore
+  }
 
   //If we make it here, then RX pin stayed low the whole time
   set_default_settings(); //Reset baud, escape characters, escape number, system mode
 
   //Now sit in forever loop indicating system is now at 9600bps
-  while(1)
+  while (1)
   {
-    delay(500);
+    delay(1000);
     toggleLED();
+    Serial.println(F("Reset - please power cycle"));
   }
 }
 
@@ -681,15 +900,21 @@ void set_default_settings(void)
   setting_tare_point = 0;
 
   //Reset time stamp
-  setting_time_stamp = true;
-  
+  setting_timestamp = true;
+
   //Reset decimals
   setting_decimal_places = 2;
-  
+
   //Reset average amount
   setting_average_amount = 4;
 
-  //Commit these new settings to memory  
+  //Reset local temp
+  setting_local_temp_enable = true;
+
+  //Reset remote temp
+  setting_remote_temp_enable = true;
+
+  //Commit these new settings to memory
   record_system_settings();
 }
 
@@ -706,21 +931,24 @@ void record_system_settings(void)
 
   writeBytes(LOCATION_TARE_POINT_MSB, setting_tare_point, sizeof(setting_tare_point));
 
-  EEPROM.write(LOCATION_TIME_STAMP, setting_time_stamp);
+  EEPROM.write(LOCATION_TIMESTAMP, setting_timestamp);
 
   EEPROM.write(LOCATION_DECIMAL_PLACES, setting_decimal_places);
 
   EEPROM.write(LOCATION_AVERAGE_AMOUNT, setting_average_amount);
+
+  EEPROM.write(LOCATION_LOCAL_TEMP_ENABLE, setting_local_temp_enable);
+
+  EEPROM.write(LOCATION_REMOTE_TEMP_ENABLE, setting_remote_temp_enable);
 }
 
 //Reads the current system settings from EEPROM
 //If anything looks weird, reset setting to default value
-void read_system_settings(void)
+void readSystemSettings(void)
 {
   //Read what the current UART speed is from EEPROM memory
   setting_uart_speed = readBytes(LOCATION_BAUD_MSB, sizeof(setting_uart_speed));
-
-  if(setting_uart_speed < BAUD_MIN || setting_uart_speed > BAUD_MAX) 
+  if (setting_uart_speed < BAUD_MIN || setting_uart_speed > BAUD_MAX)
   {
     setting_uart_speed = 9600; //Reset UART to 9600 if there is no speed stored
     writeBytes(LOCATION_BAUD_MSB, setting_uart_speed, sizeof(setting_uart_speed));
@@ -728,11 +956,7 @@ void read_system_settings(void)
 
   //Determine the units we should be using
   setting_units = EEPROM.read(LOCATION_MASS_UNITS);
-  Serial.begin(9600);
-  Serial.print("Units: ");
-  Serial.println(setting_units);
-  
-  if(setting_units > 1)
+  if (setting_units > 1)
   {
     setting_units = UNITS_LBS; //Default to lbs
     EEPROM.write(LOCATION_MASS_UNITS, setting_units);
@@ -740,7 +964,7 @@ void read_system_settings(void)
 
   //Determine the report rate
   setting_report_rate = readBytes(LOCATION_REPORT_RATE_MSB, sizeof(setting_report_rate));
-  if(setting_report_rate == 0xFFFF) 
+  if (setting_report_rate == 0xFFFF)
   {
     setting_report_rate = 200; //Default to 200ms
     writeBytes(LOCATION_REPORT_RATE_MSB, setting_report_rate, sizeof(setting_report_rate));
@@ -748,7 +972,7 @@ void read_system_settings(void)
 
   //Look up the calibration factor
   setting_calibration_factor = readBytes(LOCATION_CALIBRATION_FACTOR_MSB, sizeof(setting_calibration_factor));
-  if(setting_calibration_factor == 0xFFFFFFFF) 
+  if (setting_calibration_factor == 0xFFFFFFFF)
   {
     setting_calibration_factor = 0; //Default to 0
     writeBytes(LOCATION_CALIBRATION_FACTOR_MSB, setting_calibration_factor, sizeof(setting_calibration_factor));
@@ -756,23 +980,23 @@ void read_system_settings(void)
 
   //Look up the zero tare point
   setting_tare_point = readBytes(LOCATION_TARE_POINT_MSB, sizeof(setting_tare_point));
-  if(setting_tare_point == 0xFFFFFFFF) 
+  if (setting_tare_point == 0xFFFFFFFF)
   {
     setting_tare_point = 1000; //Default to 1000 so we don't get inf
     writeBytes(LOCATION_TARE_POINT_MSB, setting_tare_point, sizeof(setting_tare_point));
   }
 
   //Determine if we need time stamps
-  setting_time_stamp = EEPROM.read(LOCATION_TIME_STAMP);
-  if(setting_time_stamp > 2) 
+  setting_timestamp = EEPROM.read(LOCATION_TIMESTAMP);
+  if (setting_timestamp > 2)
   {
-    setting_time_stamp = true; //Default to true
-    EEPROM.write(LOCATION_TIME_STAMP, setting_time_stamp);
+    setting_timestamp = true; //Default to true
+    EEPROM.write(LOCATION_TIMESTAMP, setting_timestamp);
   }
 
   //Look up decimals
   setting_decimal_places = EEPROM.read(LOCATION_DECIMAL_PLACES);
-  if(setting_decimal_places > 5) 
+  if (setting_decimal_places > 5)
   {
     setting_decimal_places = 2; //Default to 2
     EEPROM.write(LOCATION_DECIMAL_PLACES, setting_decimal_places);
@@ -780,20 +1004,36 @@ void read_system_settings(void)
 
   //Look up average amount
   setting_average_amount = EEPROM.read(LOCATION_AVERAGE_AMOUNT);
-  if(setting_average_amount > 64 || setting_average_amount == 0) 
+  if (setting_average_amount > 64 || setting_average_amount == 0)
   {
     setting_average_amount = 4; //Default to 4
     EEPROM.write(LOCATION_AVERAGE_AMOUNT, setting_average_amount);
+  }
+
+  //Look up if we are reporting local temperature or not
+  setting_local_temp_enable = EEPROM.read(LOCATION_LOCAL_TEMP_ENABLE);
+  if (setting_local_temp_enable > 1)
+  {
+    setting_local_temp_enable = true; //Default to true
+    EEPROM.write(LOCATION_LOCAL_TEMP_ENABLE, setting_local_temp_enable);
+  }
+
+  //Look up if we are reporting remote temperature or not
+  setting_remote_temp_enable = EEPROM.read(LOCATION_REMOTE_TEMP_ENABLE);
+  if (setting_remote_temp_enable > 1)
+  {
+    setting_remote_temp_enable = true; //Default to true
+    EEPROM.write(LOCATION_REMOTE_TEMP_ENABLE, setting_remote_temp_enable);
   }
 }
 
 //Record a series of bytes to EEPROM starting at address
 void writeBytes(byte address, long setting, byte sizeOfSetting)
 {
-  for(byte x = 0 ; x < sizeOfSetting ; x++)
+  for (byte x = 0 ; x < sizeOfSetting ; x++)
   {
     byte toWrite = setting >> 8 * (sizeOfSetting - 1 - x);
-    EEPROM.write(address + x, toWrite);   
+    EEPROM.write(address + x, toWrite);
   }
 }
 
@@ -802,13 +1042,13 @@ long readBytes(byte address, byte sizeOfSetting)
 {
   long setting = 0;
 
-  for(byte x = 0 ; x < sizeOfSetting ; x++)
+  for (byte x = 0 ; x < sizeOfSetting ; x++)
   {
     setting <<= 8;
     setting |= EEPROM.read(address + x);
   }
 
-  return(setting);
+  return (setting);
 }
 
 //Reads a line until the \n enter character is found
@@ -817,14 +1057,14 @@ byte read_line(char* buffer, byte buffer_length)
   memset(buffer, 0, buffer_length); //Clear buffer
 
   byte read_length = 0;
-  while(read_length < buffer_length - 1) {
+  while (read_length < buffer_length - 1) {
     while (!Serial.available());
     byte c = Serial.read();
 
     toggleLED(); //Blink status LED with each character received
-    
-    if(c == 0x08 || c == 0x7f) { //Backspace characters
-      if(read_length < 1)
+
+    if (c == 0x08 || c == 0x7f) { //Backspace characters
+      if (read_length < 1)
         continue;
 
       --read_length;
@@ -839,7 +1079,7 @@ byte read_line(char* buffer, byte buffer_length)
 
     Serial.print((char)c); //Echo the user's input
 
-    if(c == '\r') {
+    if (c == '\r') {
       Serial.println();
       buffer[read_length] = '\0';
       break;
@@ -860,7 +1100,7 @@ byte read_line(char* buffer, byte buffer_length)
 uint32_t strtolong(const char* str)
 {
   uint32_t l = 0;
-  while(*str >= '0' && *str <= '9')
+  while (*str >= '0' && *str <= '9')
     l = l * 10 + (*str++ - '0');
 
   return l;

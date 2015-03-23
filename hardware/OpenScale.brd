@@ -328,7 +328,7 @@
 <text x="16.256" y="27.305" size="1.27" layer="21" font="vector" ratio="15">RX</text>
 <text x="8.255" y="36.195" size="1.27" layer="21" font="vector" ratio="15">Ext Temp</text>
 <text x="10.795" y="37.592" size="1.27" layer="22" font="vector" ratio="15" rot="MR270">5V</text>
-<text x="13.335" y="37.592" size="1.27" layer="22" font="vector" ratio="15" rot="MR270">SIG</text>
+<text x="13.335" y="37.592" size="1.27" layer="22" font="vector" ratio="15" rot="MR270">DAT</text>
 <text x="15.875" y="37.592" size="1.27" layer="22" font="vector" ratio="15" rot="MR270">GND</text>
 <text x="38.1" y="34.798" size="1.27" layer="21" font="vector" ratio="15">Reset</text>
 <text x="35.814" y="16.256" size="1.778" layer="21" font="vector" ratio="15">OpenScale</text>
@@ -375,14 +375,17 @@
 <text x="9.271" y="3.175" size="1.27" layer="21" font="vector" ratio="15">B+</text>
 <text x="9.271" y="0.635" size="1.27" layer="21" font="vector" ratio="15">B-</text>
 <wire x1="27.305" y1="41.402" x2="27.305" y2="-0.889" width="0.254" layer="51"/>
-<text x="51.816" y="5.08" size="1.016" layer="21" font="vector" ratio="15" rot="R90">RST</text>
-<text x="50.8" y="5.08" size="1.016" layer="22" font="vector" ratio="15" rot="MR90">RST</text>
+<text x="51.816" y="5.08" size="1.016" layer="21" font="vector" ratio="15" rot="R90">DTR</text>
+<text x="50.8" y="5.08" size="1.016" layer="22" font="vector" ratio="15" rot="MR90">DTR</text>
 <text x="49.911" y="15.875" size="1.778" layer="22" font="vector" ratio="15" rot="MR270">FTDI</text>
 <text x="49.53" y="17.78" size="1.016" layer="22" font="vector" ratio="15" rot="MR90">BLK</text>
 <text x="49.53" y="5.08" size="1.016" layer="22" font="vector" ratio="15" rot="MR90">GRN</text>
 <text x="7.493" y="27.94" size="1.27" layer="22" font="vector" ratio="15" rot="MR0">5V</text>
 <text x="12.573" y="30.48" size="1.27" layer="22" font="vector" ratio="15" rot="MR180">SIG</text>
 <rectangle x1="27.559" y1="35.941" x2="28.321" y2="37.719" layer="41"/>
+<text x="51.816" y="15.621" size="1.016" layer="21" font="vector" ratio="15" rot="R90">NC</text>
+<text x="50.8" y="15.621" size="1.016" layer="22" font="vector" ratio="15" rot="MR90">NC</text>
+<text x="7.493" y="30.48" size="1.27" layer="22" font="vector" ratio="15" rot="MR0">GND</text>
 </plain>
 <libraries>
 <library name="SparkFun-Aesthetics">
