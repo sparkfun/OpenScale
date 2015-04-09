@@ -56,7 +56,7 @@
 <layer number="46" name="Milling" color="3" fill="1" visible="no" active="yes"/>
 <layer number="47" name="Measures" color="7" fill="1" visible="no" active="yes"/>
 <layer number="48" name="Document" color="7" fill="1" visible="no" active="yes"/>
-<layer number="49" name="Reference" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="49" name="Reference" color="7" fill="1" visible="no" active="yes"/>
 <layer number="50" name="dxf" color="7" fill="1" visible="no" active="no"/>
 <layer number="51" name="tDocu" color="6" fill="1" visible="yes" active="yes"/>
 <layer number="52" name="bDocu" color="7" fill="1" visible="no" active="yes"/>
@@ -3250,9 +3250,9 @@ design rules under a new name.</description>
 <wire x1="36.83" y1="22.44" x2="36.83" y2="23.73" width="0.254" layer="1"/>
 <wire x1="10.16" y1="39.37" x2="10.16" y2="38.1" width="0.254" layer="1"/>
 <via x="31.75" y="14.605" extent="1-16" drill="0.508"/>
-<wire x1="31.75" y1="14.605" x2="36.195" y2="14.605" width="0.508" layer="16"/>
-<wire x1="36.195" y1="14.605" x2="38.1" y2="16.51" width="0.508" layer="16"/>
-<wire x1="38.1" y1="16.51" x2="38.1" y2="20.32" width="0.508" layer="16"/>
+<wire x1="31.75" y1="14.605" x2="34.925" y2="14.605" width="0.508" layer="16"/>
+<wire x1="34.925" y1="14.605" x2="38.1" y2="17.78" width="0.508" layer="16"/>
+<wire x1="38.1" y1="17.78" x2="38.1" y2="20.32" width="0.508" layer="16"/>
 <via x="38.1" y="20.32" extent="1-16" drill="0.508"/>
 <wire x1="24.384" y1="23.749" x2="24.384" y2="21.463" width="0.254" layer="1"/>
 <wire x1="24.384" y1="21.463" x2="23.876" y2="20.955" width="0.254" layer="1"/>
@@ -3462,12 +3462,12 @@ design rules under a new name.</description>
 <contactref element="U4" pad="1"/>
 <wire x1="34.7726" y1="20.8534" x2="34.7726" y2="21.33" width="0.254" layer="1"/>
 <wire x1="24.39" y1="8.255" x2="26.035" y2="8.255" width="0.254" layer="1"/>
-<wire x1="26.035" y1="8.255" x2="26.67" y2="8.89" width="0.254" layer="16"/>
-<wire x1="26.67" y1="8.89" x2="26.67" y2="17.272" width="0.254" layer="16"/>
-<wire x1="26.67" y1="17.272" x2="27.305" y2="17.907" width="0.254" layer="16"/>
+<wire x1="26.035" y1="8.255" x2="26.924" y2="9.144" width="0.254" layer="16"/>
+<wire x1="26.924" y1="17.526" x2="27.305" y2="17.907" width="0.254" layer="16"/>
 <wire x1="27.305" y1="17.907" x2="34.925" y2="17.907" width="0.254" layer="16"/>
 <wire x1="34.925" y1="17.907" x2="35.56" y2="18.542" width="0.254" layer="16"/>
 <wire x1="35.56" y1="18.542" x2="35.56" y2="19.05" width="0.254" layer="16"/>
+<wire x1="26.924" y1="9.144" x2="26.924" y2="17.526" width="0.254" layer="16"/>
 </signal>
 <signal name="B-">
 <contactref element="U1" pad="9"/>
@@ -3639,6 +3639,7 @@ design rules under a new name.</description>
 </signals>
 <errors>
 <approved hash="5,1,21c68d75dd048d37"/>
+<approved hash="3,1,0303fd7dfd75030b"/>
 <approved hash="19,1,978e9ef5d0dd0443"/>
 <approved hash="19,1,cf3aad60ffcc4073"/>
 <approved hash="19,1,b40376344ef9ad2e"/>

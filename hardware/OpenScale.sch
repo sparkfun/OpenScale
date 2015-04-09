@@ -26397,6 +26397,8 @@ Connection</text>
 Serial Interface</text>
 <text x="309.88" y="162.56" size="1.778" layer="96">VBG = 1.25V</text>
 <text x="259.08" y="165.1" size="1.778" layer="96">AVDD = VBG(R1+R2)/R1</text>
+<text x="421.64" y="7.62" size="1.778" layer="94">v03</text>
+<text x="353.568" y="11.43" size="2.54" layer="94">N. Seidle</text>
 </plain>
 <instances>
 <instance part="GND2" gate="1" x="121.92" y="35.56"/>
