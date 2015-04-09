@@ -13,12 +13,12 @@
  It relies on the HX711 load cell amplifier.
 
  How to use:
- 1) Wire your load cell to the board using the 4-pin connection (E+/-, A+/-) or the RJ11 connection.
+ 1) Wire your load cell to the board using the 4-pin connection (E+/-, A+/-) or the RJ45 connection.
  2) Attach board to USB and open terminal at 9600bps
- 3) Press q to bring up settings menu
+ 3) Press x to bring up settings menu
  4) Select units LBS/KG
  5) Tare the scale with no weight on the scale
- 6) Calibrate the scale: Remove an weight, start calibration routine, place weight on scale, adjust calibration
+ 6) Calibrate the scale: Remove any weight, start calibration routine, place weight on scale, adjust calibration
  factor until scale reads out the calibration weight.
  7) Press x and test your scale
 
@@ -38,7 +38,7 @@
  You will need to power down OpenScale, change your system UART settings to match the new OpenScale
  baud rate and then power OpenScale back up.
 
- STAT LED / D13 - flashes when character is received
+ STAT LED / D13 - toggles after each report
 
  If you're using this firmware with the HX711 breakout and an Uno here are the pins to hook up:
  Arduino pin 2 -> HX711 CLK
@@ -49,10 +49,8 @@
  TODO:
  Change the read range from 100s of lbs to grams or micrograms.
  Make zero range changeable by user
-
- Unit Tests:
- test DS18B20 over ethernet cable to load combinator
-
+ Test scale from 1 coke to double coke
+ Allow for direct/raw output
 
  Testing:
  10.0968 - 8:20AM
@@ -69,9 +67,40 @@
  9.96 7:58AM the following morning
  Looks like we can get to a static point. Seems to be... break in? on the load cell
 
-
-
-
+ 3/28
+ 10.1 at 8:50AM calibrated
+ 9.83 at 9AM
+ 10.1 at 3:37PM re-calibrated
+ 9.39 at 6:19pm, recaled to 10.1
+ 9.67 at 9:19pm, recaled to 10.1
+ 3/29 
+ 8.94 at 8:27AM
+ 
+ 3/31 wooden scale
+ 8:27am cal (96530) to 10.1
+ 8PM perfect 10.10. Adding 2nd coke, 20.24 (really good)
+ 
+ Need to duplicate with ehternet cable
+ 
+ Testing resistors:
+ wooden: grn/white and red/black are 1k. Every other combo is 750
+ metal: grn/white and red/blk are 2k. Every other combo is 1.5k
+ 
+ 3/31 More testing with metal scale
+ 9:45PM cal (-6353) to 10.1
+ 
+ 4/2 Testing with wooden + ehternet cable
+ 8:34AM cal to 10.1 (-96179)
+ 
+ 4/3 Testing with wooden + ehternet cable
+ 7PM 9.89 seems pretty close
+ recal to 10.1 (-93261)
+ 9:30AM 10.07. Nice. Works!
+ 
+ Ethernet cable to wooden works after a few hour cal
+ 
+ 
+ 
  */
 
 #include "HX711.h" //Library created by bogde
@@ -79,6 +108,10 @@
 #include <Wire.h> //Needed to talk to on board TMP102 temp sensor
 #include <EEPROM.h> //Needed to record user settings
 #include <OneWire.h> //Needed to read DS18B20 temp sensors
+
+#include <avr/sleep.h> //Needed for sleep_mode
+#include <avr/power.h> //Needed for powering down perihperals such as the ADC/TWI and Timers
+
 
 #define FIRMWARE_VERSION "1.0"
 
@@ -95,9 +128,7 @@ byte setting_average_amount; //How many readings to take before reporting readin
 boolean setting_local_temp_enable; //Prints the local temperature in C
 boolean setting_remote_temp_enable; //Prints the remote temperature in C
 
-byte setting_zero_window = 1; //
-
-const byte escape_character = 'x'; //This is the ASCII character we look for to break logging
+const byte escape_character = 'x'; //This is the ASCII character we look for to break reporting
 
 HX711 scale(DAT, CLK); //Setup interface to scale
 
@@ -115,43 +146,38 @@ void setup()
   //  EEPROM.write(x, 0xFF);
   //}
 
-  Serial.begin(9600);
-
   Wire.begin();
 
   readSystemSettings(); //Load all system settings from EEPROM
 
+  //Shut off TWI, Timer2, Timer1, ADC
+  /*ADCSRA &= ~(1<<ADEN); //Disable ADC
+  ACSR = (1<<ACD); //Disable the analog comparator
+  DIDR0 = 0x3F; //Disable digital input buffers on all ADC0-ADC5 pins
+  DIDR1 = (1<<AIN1D)|(1<<AIN0D); //Disable digital input buffer on AIN1/0
+
+  power_timer1_disable();
+  power_timer2_disable();
+  power_adc_disable();*/
+
   pinMode(AMP_EN, OUTPUT);
-  enableHX711();
+  digitalWrite(AMP_EN, HIGH); //Turn on power to HX711
 
   //Setup UART
   Serial.begin(setting_uart_speed);
-  Serial.println(F("Serial Load Cell Converter"));
-  Serial.println(F("By SparkFun Electronics"));
+  displaySystemHeader(); //Product title and firmware version
 
   checkEmergencyReset(); //Look to see if the RX pin is being pulled low
 
   scale.set_scale(setting_calibration_factor); //Calibrate scale from EEPROM value
   scale.set_offset(setting_tare_point); //Zero out the scale using a previously known zero point
 
-  //Look to see if we have an external or remote temp sensor attached
-  if (remoteSensor.search(remoteSensorAddress) == 0)
-  {
-    remoteSensorAttached = false;
-    Serial.println(F("No remote sensor found."));
-  }
-  else
-  {
-    remoteSensorAttached = true;
-    Serial.println(F("Remote temperature sensor detected"));
-  }
-
   //Calculate the minimum time between reports
   int minTime = calcMinimumReadTime();
   Serial.print(F("Minimum time between reports: "));
   Serial.println(minTime);
 
-  //Look for a weird case where the report rate time is less than the allowed minimum
+  //Look for a special case where the report rate time is less than the allowed minimum
   if (setting_report_rate < minTime) setting_report_rate = minTime;
 
   Serial.print(F("Press "));
@@ -197,14 +223,11 @@ void loop()
     }
   }
 
-  //Take average of readings
-  enableHX711();
-  //delay(500);
-  scale.set_scale(setting_calibration_factor); //Calibrate scale from EEPROM value
-  scale.set_offset(setting_tare_point); //Zero out the scale using a previously known zero point
+  //Power cycle takes 400ms so only do so if our report rate is less than 400ms
+  if(setting_report_rate > 400) scale.power_up();
 
+  //Take average of readings
   float currentReading = scale.get_units(setting_average_amount);
-  disableHX711();
 
   //Zero out reading if it is too close to zero
   //if(abs(currentReading) < setting_zero_window) currentReading = 0;
@@ -216,6 +239,12 @@ void loop()
 
   toggleLED();
 
+  Serial.println();
+  Serial.flush();
+
+  //This takes time so put it after we have printed the report
+  if(setting_report_rate > 400) scale.power_down();
+
   //Hang out until the end of this report period
   while (1)
   {
@@ -226,31 +255,16 @@ void loop()
       char incoming = Serial.read();
       if (incoming == escape_character)
       {
-        enableHX711();
+        //Power cycle takes 400ms so only do so if our report rate is less than 400ms
+        if(setting_report_rate > 400) scale.power_up();
         system_setup();
-        disableHX711();
+        if(setting_report_rate > 400) scale.power_down();
       }
     }
 
     if ((millis() - startTime) >= setting_report_rate) break;
-    delayMicroseconds(100);
+    //delayMicroseconds(0);
   }
-
-  /*float delta = lastReading - currentReading;
-  lastReading = currentReading;
-
-  totalReadings += delta;
-
-  numberOfReadings++;
-
-  float avgDelta = totalReadings / numberOfReadings;
-
-  Serial.print(" Delta: ");
-  Serial.print(delta, 3);
-  Serial.print(" avgDelta: ");
-  Serial.print(avgDelta, 3);*/
-
-  Serial.println();
 }
 
 
@@ -259,8 +273,8 @@ void system_setup(void)
 {
   while (1)
   {
-    Serial.print(F("\r\nSerial Load Cell Converter version "));
-    Serial.println(F(FIRMWARE_VERSION));
+    displaySystemHeader(); //Product title and firmware version
+
     Serial.println(F("System Configuration"));
 
     Serial.print(F("1) Tare scale to zero ["));
@@ -508,7 +522,7 @@ void baud_setup(void)
   Serial.print(setting_uart_speed, DEC);
   Serial.println(F(" bps"));
 
-  Serial.println(F("Enter new baud rate ('x' to exit):"));
+  Serial.println(F("Enter new baud rate ('x' to abort):"));
 
   //Print prompt
   Serial.print(F(">"));
@@ -614,6 +628,7 @@ void calibrate_scale(void)
   Serial.println(F("After readings begin, place known weight on scale"));
   Serial.println(F("Press + or a to increase calibration factor"));
   Serial.println(F("Press - or z to decrease calibration factor"));
+  Serial.println(F("Press 0 to zero factor"));
   Serial.println(F("Press x to exit"));
 
   delay(3000); //Delay so user can read instructions
@@ -672,6 +687,8 @@ void calibrate_scale(void)
           setting_calibration_factor += changeRate;
         else if (temp == '-' || temp == 'z')
           setting_calibration_factor -= changeRate;
+        else if (temp == '0')
+          setting_calibration_factor = 0;
         else if (temp == 'x')
         {
           //Record this new value to EEPROM
@@ -799,6 +816,18 @@ float getRemoteTemperature()
   //https://www.sparkfun.com/products/11050
   boolean type_s = false;
 
+  //This was moved to the end of the function. We will be calling this function many times so reset the 
+  //sensor and then tell it to do a temp conversion. This removes the need to delay for a sensor reading.
+  remoteSensor.reset();
+  remoteSensor.select(remoteSensorAddress); //The address is found at power on
+  remoteSensor.write(0x44, 1);        // start conversion, with parasite power on at the end
+
+  //750ms for 12-bit
+  //375ms for 11-bit
+  //187ms for 10-bit
+  //93ms for 9-bit
+  delay(100);
+
   remoteSensor.reset();
   remoteSensor.select(remoteSensorAddress);
   remoteSensor.write(0xBE);         // Read Scratchpad
@@ -826,18 +855,6 @@ float getRemoteTemperature()
     else if (cfg == 0x40) raw = raw & ~1; // 11 bit res, 375 ms
     //// default is 12 bit resolution, 750 ms conversion time
   }
-
-  //This was moved to the end of the function. We will be calling this function many times so reset the 
-  //sensor and then tell it to do a temp conversion. This removes the need to delay for a sensor reading.
-  remoteSensor.reset();
-  remoteSensor.select(remoteSensorAddress); //The address is found at power on
-  remoteSensor.write(0x44, 1);        // start conversion, with parasite power on at the end
-
-  //750ms for 12-bit
-  //375ms for 11-bit
-  //187ms for 10-bit
-  //93ms for 9-bit
-  //delay(100);
 
   float celsius = (float)raw / 16.0;
   return (celsius);
@@ -881,6 +898,28 @@ void checkEmergencyReset(void)
   }
 }
 
+//We use this at startup and for the configuration menu
+//Saves us a few dozen bytes
+void displaySystemHeader(void)
+{
+  Serial.print(F("\r\nSerial Load Cell Converter version "));
+  Serial.println(F(FIRMWARE_VERSION));
+  Serial.println(F("By SparkFun Electronics"));
+
+  //Look to see if we have an external or remote temp sensor attached
+  if (remoteSensor.search(remoteSensorAddress) == 0)
+  {
+    remoteSensorAttached = false;
+    Serial.println(F("No remote sensor found"));
+  }
+  else
+  {
+    remoteSensorAttached = true;
+    Serial.println(F("Remote temperature sensor detected"));
+  }
+  
+}
+
 //Resets all the system settings to safe values
 void set_default_settings(void)
 {
@@ -890,8 +929,8 @@ void set_default_settings(void)
   //Reset to pounds as our unit of measure
   setting_units = UNITS_LBS;
 
-  //Reset report rate to 5Hz
-  setting_report_rate = 200;
+  //Reset report rate to 2Hz
+  setting_report_rate = 500;
 
   //Reset calibration factor
   setting_calibration_factor = 1000;

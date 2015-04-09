@@ -1,6 +1,6 @@
 //Arduino pin connections to the DAT and CLK pins on the HX711 IC
-#define DAT  2
-#define CLK  3
+#define DAT  3
+#define CLK  2
 #define AMP_EN A2 //The enable pin to the 5V regulator for the HX711 IC
 
 #define tmp102Address 0x49 //This is the 7-bit address of the TMP102. On OpenScale it has ADR0 tied to VCC.
@@ -33,8 +33,4 @@
 
 #define UNITS_KG  0
 #define UNITS_LBS 1
-
-#define enableHX711()  digitalWrite(AMP_EN, HIGH)
-#define disableHX711()  digitalWrite(AMP_EN, LOW)
-
 
