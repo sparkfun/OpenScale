@@ -27,7 +27,6 @@
 #define LOCATION_LOCAL_TEMP_ENABLE              (LOCATION_MASS_UNITS + 18)
 #define LOCATION_REMOTE_TEMP_ENABLE             (LOCATION_MASS_UNITS + 19)
 #define LOCATION_STATUS_ENABLE                  (LOCATION_MASS_UNITS + 20)
-#define LOCATION_SERIAL_TRIGGER_ENABLE          (LOCATION_MASS_UNITS + 21)
 
 //Arduino doesn't properly handle bauds lower than 500bps
 #define BAUD_MIN  2400

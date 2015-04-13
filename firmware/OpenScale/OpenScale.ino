@@ -99,7 +99,8 @@
  
  Ethernet cable to wooden works after a few hour cal
  
- 
+ Arduino library properties file in github, send to bogde as pull request
+ arduino.cc
  
  */
 
@@ -108,10 +109,6 @@
 #include <Wire.h> //Needed to talk to on board TMP102 temp sensor
 #include <EEPROM.h> //Needed to record user settings
 #include <OneWire.h> //Needed to read DS18B20 temp sensors
-
-#include <avr/sleep.h> //Needed for sleep_mode
-#include <avr/power.h> //Needed for powering down perihperals such as the ADC/TWI and Timers
-
 
 #define FIRMWARE_VERSION "1.0"
 
@@ -127,8 +124,11 @@ byte setting_decimal_places; //How many decimals to display
 byte setting_average_amount; //How many readings to take before reporting reading
 boolean setting_local_temp_enable; //Prints the local temperature in C
 boolean setting_remote_temp_enable; //Prints the remote temperature in C
+boolean setting_status_enable; //Turns on/off the blinking status LED
+boolean setting_serial_trigger_enable; //Takes reading when serial character is received
 
 const byte escape_character = 'x'; //This is the ASCII character we look for to break reporting
+const int minimum_powercycle_time = 500; //Anything less than 500 can cause reading problems
 
 HX711 scale(DAT, CLK); //Setup interface to scale
 
@@ -145,20 +145,10 @@ void setup()
   //{
   //  EEPROM.write(x, 0xFF);
   //}
-
+  
   Wire.begin();
 
   readSystemSettings(); //Load all system settings from EEPROM
-
-  //Shut off TWI, Timer2, Timer1, ADC
-  /*ADCSRA &= ~(1<<ADEN); //Disable ADC
-  ACSR = (1<<ACD); //Disable the analog comparator
-  DIDR0 = 0x3F; //Disable digital input buffers on all ADC0-ADC5 pins
-  DIDR1 = (1<<AIN1D)|(1<<AIN0D); //Disable digital input buffer on AIN1/0
-
-  power_timer1_disable();
-  power_timer2_disable();
-  power_adc_disable();*/
 
   pinMode(AMP_EN, OUTPUT);
   digitalWrite(AMP_EN, HIGH); //Turn on power to HX711
@@ -182,18 +172,21 @@ void setup()
 
   Serial.print(F("Press "));
   Serial.print((char)escape_character);
-  Serial.println(F(" to bring up settings."));
+  Serial.println(F(" to bring up settings"));
 
   Serial.println(F("Readings:"));
+  
 }
-
-long numberOfReadings = 0;
-float lastReading = 0;
-float totalReadings = 0;
 
 void loop()
 {
+  //Power cycle takes around 400ms so only do so if our report rate is greater than 500ms
+  if(setting_report_rate > minimum_powercycle_time) powerUpScale();
+
   long startTime = millis();
+
+  //Take average of readings
+  float currentReading = scale.get_units(setting_average_amount);
 
   //Print time stamp
   if (setting_timestamp == true)
@@ -223,27 +216,18 @@ void loop()
     }
   }
 
-  //Power cycle takes 400ms so only do so if our report rate is less than 400ms
-  if(setting_report_rate > 400) scale.power_up();
-
-  //Take average of readings
-  float currentReading = scale.get_units(setting_average_amount);
-
-  //Zero out reading if it is too close to zero
-  //if(abs(currentReading) < setting_zero_window) currentReading = 0;
-
   Serial.print(currentReading, setting_decimal_places);
   Serial.print(F(","));
   if (setting_units == UNITS_LBS) Serial.print(F("lbs"));
   if (setting_units == UNITS_KG) Serial.print(F("kg"));
 
-  toggleLED();
+  if(setting_status_enable == true) toggleLED();
 
   Serial.println();
   Serial.flush();
 
   //This takes time so put it after we have printed the report
-  if(setting_report_rate > 400) scale.power_down();
+  if(setting_report_rate > minimum_powercycle_time) powerDownScale();
 
   //Hang out until the end of this report period
   while (1)
@@ -256,17 +240,40 @@ void loop()
       if (incoming == escape_character)
       {
         //Power cycle takes 400ms so only do so if our report rate is less than 400ms
-        if(setting_report_rate > 400) scale.power_up();
+        if(setting_report_rate > minimum_powercycle_time) powerUpScale();
         system_setup();
-        if(setting_report_rate > 400) scale.power_down();
+        //if(setting_report_rate > minimum_powercycle_time) powerDownScale;
       }
+      if(setting_status_enable == false) digitalWrite(statusLED, LOW); //Turn off LED
+
     }
 
     if ((millis() - startTime) >= setting_report_rate) break;
-    //delayMicroseconds(0);
+  }
+  
+  //If we are serially triggered then wait for incoming character
+  if (setting_serial_trigger_enable == true)
+  {
+    powerDownScale();    
+    while(Serial.available() == false) delay(1);
+    //Do nothing with the character
+    
+    //We could go into deep sleep here. This would save 10-20mA.
+    powerUpScale();
   }
 }
 
+void powerUpScale(void)
+{
+  digitalWrite(AMP_EN, HIGH); //Turn on power to HX711
+  scale.power_up();
+}
+
+void powerDownScale(void)
+{
+  scale.power_down();
+  digitalWrite(AMP_EN, LOW); //Turn off power to HX711
+}
 
 //Configure how OpenScale operates
 void system_setup(void)
@@ -318,6 +325,16 @@ void system_setup(void)
 
     Serial.print(F("r) Remote temp ["));
     if (setting_remote_temp_enable == true) Serial.print(F("On"));
+    else Serial.print(F("Off"));
+    Serial.println(F("]"));
+
+    Serial.print(F("s) Status LED ["));
+    if (setting_status_enable == true) Serial.print(F("Blink"));
+    else Serial.print(F("Off"));
+    Serial.println(F("]"));
+
+    Serial.print(F("t) Serial trigger ["));
+    if (setting_serial_trigger_enable == true) Serial.print(F("On"));
     else Serial.print(F("Off"));
     Serial.println(F("]"));
 
@@ -429,6 +446,38 @@ void system_setup(void)
       {
         Serial.println(F("on"));
         setting_remote_temp_enable = true;
+      }
+      record_system_settings();
+    }
+
+    else if (command == 's')
+    {
+      Serial.print(F("\n\Status LED "));
+      if (setting_status_enable == true)
+      {
+        Serial.println(F("off"));
+        setting_status_enable = false;
+        digitalWrite(statusLED, LOW); //Turn off the LED
+      }
+      else
+      {
+        Serial.println(F("on"));
+        setting_status_enable = true;
+      }
+      record_system_settings();
+    }
+    else if (command == 't')
+    {
+      Serial.print(F("\n\Serial Trigger "));
+      if (setting_serial_trigger_enable == true)
+      {
+        Serial.println(F("off"));
+        setting_serial_trigger_enable = false;
+      }
+      else
+      {
+        Serial.println(F("on"));
+        setting_serial_trigger_enable = true;
       }
       record_system_settings();
     }
@@ -952,6 +1001,12 @@ void set_default_settings(void)
 
   //Reset remote temp
   setting_remote_temp_enable = true;
+  
+  //Reset LED blinking
+  setting_status_enable = true;
+
+  //Reset serial trigger
+  setting_serial_trigger_enable = false;
 
   //Commit these new settings to memory
   record_system_settings();
@@ -979,6 +1034,10 @@ void record_system_settings(void)
   EEPROM.write(LOCATION_LOCAL_TEMP_ENABLE, setting_local_temp_enable);
 
   EEPROM.write(LOCATION_REMOTE_TEMP_ENABLE, setting_remote_temp_enable);
+  
+  EEPROM.write(LOCATION_STATUS_ENABLE, setting_status_enable);
+
+  EEPROM.write(LOCATION_SERIAL_TRIGGER_ENABLE, setting_serial_trigger_enable);
 }
 
 //Reads the current system settings from EEPROM
@@ -1063,6 +1122,22 @@ void readSystemSettings(void)
   {
     setting_remote_temp_enable = true; //Default to true
     EEPROM.write(LOCATION_REMOTE_TEMP_ENABLE, setting_remote_temp_enable);
+  }
+
+  //Look up if we are blinking the status LED
+  setting_status_enable = EEPROM.read(LOCATION_STATUS_ENABLE);
+  if (setting_status_enable > 1)
+  {
+    setting_status_enable = true; //Default to true
+    EEPROM.write(LOCATION_STATUS_ENABLE, setting_status_enable);
+  }
+
+  //Look up if we do a reading when a serial character is received
+  setting_serial_trigger_enable = EEPROM.read(LOCATION_SERIAL_TRIGGER_ENABLE);
+  if (setting_serial_trigger_enable > 1)
+  {
+    setting_serial_trigger_enable = false; //Default to false
+    EEPROM.write(LOCATION_SERIAL_TRIGGER_ENABLE, setting_serial_trigger_enable);
   }
 }
 
