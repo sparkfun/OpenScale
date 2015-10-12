@@ -1,0 +1,322 @@
+#include "HTU21D/HTU21D.h"
+#include "PietteTech_Phant/PietteTech_Phant.h"
+#include <application.h>
+
+/*
+    The HTU21D is I2C so it connects on pins D0(SDA/Green Wire) and D1(SCL/Yellow)
+    Make sure the PU jumper is cleared on the HTU21D breakout board
+    Use inline 100ohm resistors and external 4.7k pull ups
+    Make sure the HTU21D is powered from 3.3V rail not battery
+	
+	Originally I covered the HTU21D in PTFE tape in order to protect it. In short order
+	(3 days) the bees had stripped the tape off. We recommend using humidity sensors
+	with the filter built onto the device. There may be other methods to protect the 
+	sensor as well.
+	
+	The wiring to the HTU21D was about 10 feet long. Because of this the bus worked
+	on the bench and failed in the field (bus ringing). By putting 100 ohm resistors
+	inline and using 4.7k instead of 10k pull up resistors fixed the problem.
+*/
+
+HTU21D htu = HTU21D();
+
+// view the data @ http://data.sparkfun.com/streams/wpbq2p0N1rig8WJZRWpO
+Phant::Stream stream1("data.sparkfun.com", <<public key>>, <<private key>>);
+
+bool htuOnline = false;
+
+int batteryPin = A7;
+
+float humidity = 0;
+float temperature = 0;
+float battV;
+
+int local_hour_offset = 7; //Mountain time is 7 hours off GMT
+
+void setup() {
+	
+	RGB.control(true); //Indicate we're awake for reprogramming
+	RGB.color(255, 0, 0);
+
+	Wire.setSpeed(CLOCK_SPEED_100KHZ); //Default but just to be sure...
+	Wire.begin();
+
+    Serial.begin(9600); //Debug terminal
+    Serial1.begin(9600); //TX/RX from OpenScale
+
+    pinMode(batteryPin, INPUT);
+
+	if(! htu.begin())
+	    Serial.println("HTU21D not found");
+	else
+	{
+    	Serial.println("HTU21D Online");
+        htuOnline = true;
+	}
+
+    //Phant intitialization
+    stream1.begin();
+
+    //Clear out previous data from the channel
+    //clearChannel();
+}
+
+void loop() {
+
+	RGB.color(255, 0, 0);
+	
+	Serial.println("Test");
+
+    //Read the humidity sensor in the hive
+    if(htuOnline)
+    {
+        humidity = htu.readHumidity();
+        temperature = htu.readTemperature();
+    }
+    else
+    {
+        //Try again to get it online
+    	if(! htu.begin())
+    	    Serial.println("HTU21D not found");
+    	else
+    	{
+        	Serial.println("HTU21D Online");
+            htuOnline = true;
+    	}
+    }
+
+    //Check the weight
+    float weightLBS = readWeight();
+
+    //Check the battery level
+    int rawBatt = 0;
+    for(int x = 0 ; x < 8 ; x++)
+    {
+        rawBatt += analogRead(batteryPin); //Get an average reading
+        delay(10);
+    }
+    rawBatt /= 8;
+    battV = rawBatt * 2 * (3.3 / 4096); //Covert from 12-bit ADC to real world voltage
+    
+    //Figure out the local time including DST, not UTC
+    String localTime = calcLocalTime();
+    char tempStr[64];
+    localTime.toCharArray(tempStr, 64);
+    
+    //Convert C to F
+    float tempF = temperature * 1.8 + 32;
+    
+    //Do local debug printing
+	Serial.print("Hum:"); Serial.println(humidity, 2);
+	Serial.print("TempF:"); Serial.println(tempF, 2);
+	Serial.print("BattV:"); Serial.println(battV, 2);
+	Serial.print("Weight:"); Serial.println(weightLBS, 2);
+	//Serial.print("Time:"); Serial.println(localTime);
+	Serial.println();
+
+    //Add all this info to the stream
+    stream1.add("tempf", tempF, 2);
+    stream1.add("humidity", humidity, 2);
+    stream1.add("battv", battV, 2);
+    stream1.add("weightlbs", weightLBS, 2);
+    stream1.add("measurementtime", tempStr);
+
+	RGB.color(0, 0, 255); //Indicate we're about to sleep
+
+    //Post the stream to data channel
+    postToChannel();
+
+	RGB.color(0, 0, 0); //Off
+
+    //delay(5000);
+
+    //Note: Once you allow this line into the code the module has to be factory reset in order to get it 
+    //to communicate with the cloud and load new code
+//    Spark.sleep(SLEEP_MODE_DEEP, 15); //Power save!
+    Spark.sleep(SLEEP_MODE_DEEP, 60); //Power save! Move to 60s to extend battery life
+    
+    //Used for local testing without deep sleep
+    /*
+    for(int x = 0 ; x < 10 ; x++)
+    {
+        Serial.print("Sleeping");
+        delay(500); 
+        Serial.print(". ");
+        delay(500);
+    }
+    Serial.print("Awake");
+    */
+}
+
+//Listen to the serial1 port for a max of 5 seconds and try to find the weight from OpenScale
+float readWeight()
+{
+    int timeOut = 2000; //Number of miliseconds before giving up
+    int counter;
+    
+    //Clear out any trash in the buffer
+    while(Serial1.available()) Serial1.read();
+    
+    //Send any character to trigger a read
+    Serial1.print('.');
+    
+    //Now we need to spin to the first comma after the time stamp
+    counter = 0;
+    while(Serial1.read() != ',')
+    {
+        if(counter++ == timeOut) return(0); //Error
+        delay(1);
+    }
+
+    //Now we read the weight
+    counter = 0;
+    String weightStr;
+    while(1)
+    {
+        if(Serial1.available())
+        {
+            char incoming = Serial1.read();
+            if(incoming == ',')
+            {
+                //We're done!
+                return(weightStr.toFloat());
+            }
+            else
+            {
+                weightStr.concat(String(incoming));
+            }
+        }
+        
+        if(counter++ == timeOut) return(0); //Error
+        delay(1);
+    }
+        
+
+}
+
+//Given UTC time and a local offset and a date, calculate the local time
+//Includes a daylight savings time calc for the US
+String calcLocalTime()
+{
+    //Get the time that this measurement was taken
+    int hour = Time.hour(); //Most of the work will be on the current hour
+
+    //Since 2007 DST starts on the second Sunday in March and ends the first Sunday of November
+    //Let's just assume it's going to be this way for awhile (silly US government!)
+    //Example from: http://stackoverflow.com/questions/5590429/calculating-daylight-savings-time-from-only-date
+    bool dst = false; //Assume we're not in DST
+    
+    if(Time.month() > 3 && Time.month() < 11) dst = true; //DST is happening!
+
+    int DoW = Time.weekday() - 1; //Get the day of the week. 0 = Sunday, 6 = Saturday
+
+    //In March, we are DST if our previous Sunday was on or after the 8th.
+    int previousSunday = Time.day() - DoW;
+    if (Time.month() == 3)
+    {
+        if(previousSunday >= 8) dst = true; 
+    } 
+    //In November we must be before the first Sunday to be dst.
+    //That means the previous Sunday must be before the 1st.
+    if(Time.month() == 11)
+    {
+        if(previousSunday <= 0) dst = true;
+    }
+
+    if(dst == true) hour++; //If we're in DST add an extra hour
+    
+    //Convert UTC hours to local current time using local_hour
+    if(hour < local_hour_offset)
+        hour += 24; //Add 24 hours before subtracting local offset
+    hour -= local_hour_offset;
+
+    String AMPM = "AM";
+    if(hour > 12)
+    {
+        hour -= 12; //Get rid of military time
+        AMPM = "PM";
+    }
+    if(hour == 12) AMPM = "PM"; //Noon correction
+    if(hour == 0) hour = 12; //Mid-night correction
+
+    //Stick all the parts together
+    //Would be nice to do a sprintf for the entire thing but sprintf doesn't like %3A colons
+    String prettyTime;
+    char part[2];
+
+    sprintf(part, "%02d", hour);
+    prettyTime.concat(part);
+    prettyTime.concat("%3A");
+
+    sprintf(part, "%02d", Time.minute());
+    prettyTime.concat(part);
+    prettyTime.concat("%3A");
+
+    sprintf(part, "%02d", Time.second());
+    prettyTime.concat(part);
+
+    prettyTime.concat(" ");
+
+    prettyTime.concat(AMPM);
+    
+    return(prettyTime);
+}
+
+//Given a stream, posts to the data channel
+void postToChannel()
+{
+    int _retry = 0;
+    int _ret = 0;
+    unsigned long _ms = millis();
+    int _loopcount = 0;
+    
+    while (_retry < 5 && !(_ret = stream1.sendData()))
+    { 
+        delay(500); 
+        _retry++;
+    }
+    
+    float _f = (millis() - _ms) / 1000.0;
+
+    Serial.print("Post ["); Serial.print(_loopcount++); Serial.print("] ");
+
+    if (_ret)
+	    Serial.print("successfully sent");
+    else {
+    	Serial.print("could not be sent due to error (");
+    	Serial.print(stream1.getError());
+    	Serial.print(")");
+    	stream1.begin();  // reset stream to remove previous contents
+    }
+
+    if (_retry) {
+    	Serial.print(" retries = "); Serial.print(_retry);
+    }
+
+    Serial.print(" - time = "); Serial.print(_f, 1); Serial.println("s");
+}
+
+
+//Calling this function will delete all the data in the channel
+//Be careful!
+void clearChannel()
+{
+    int _retry = 0;
+    int _ret = 0;
+    
+    while (_retry < 5 && !(_ret = stream1.sendData(PHANT_CLEAR_METHOD))) 
+    { 
+        delay(500); 
+        _retry++;
+    }
+    
+    if (_ret)
+    	Serial.print("Stream successfully cleared");
+    else
+    	Serial.print("Stream could not be cleared");
+    
+    if (_retry) {
+    	Serial.print(" Retries = "); Serial.print(_retry);
+    }
+    
+}
