@@ -1,7 +1,7 @@
 OpenScale
 =======
 
-![The electronics monitoring the bee hive](https://raw.githubusercontent.com/sparkfun/OpenScale/Hive-Electronics.jpg)
+![The electronics monitoring the bee hive](https://raw.githubusercontent.com/sparkfun/OpenScale/master/Hive-Electronics.jpg)
 
 This project is still in prototyping phase. The firmware is very close to finished and we hope that you can learn and use it. 
 
