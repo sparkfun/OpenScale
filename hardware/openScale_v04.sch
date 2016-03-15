@@ -27678,8 +27678,8 @@ MMBT4403 - 40V 600mA SOT-23 (TRANS-09245)</description>
 <sheets>
 <sheet>
 <plain>
-<text x="12.7" y="144.78" size="2.54" layer="97">Microcontroller</text>
-<text x="200.66" y="144.78" size="2.54" layer="97">USB-Serial</text>
+<text x="12.7" y="144.78" size="5.08" layer="97">Microcontroller</text>
+<text x="200.66" y="144.78" size="5.08" layer="97">USB-Serial</text>
 <text x="200.66" y="218.44" size="1.778" layer="97">Default: Closed/Data rate 10SPS</text>
 <text x="200.66" y="213.36" size="1.778" layer="97">Open jumper to set to 80SPS
 Noise floor doubles to 90nV</text>
@@ -27693,11 +27693,11 @@ Noise floor doubles to 90nV</text>
 <text x="15.24" y="220.98" size="1.778" layer="97">Green or Blue</text>
 <text x="15.24" y="231.14" size="1.778" layer="97">Common Load
 Cell Colors:</text>
-<text x="309.88" y="254" size="2.54" layer="97">Temperature Compensation</text>
+<text x="309.88" y="254" size="5.08" layer="97">Temperature Compensation</text>
 <text x="240.792" y="197.358" size="2.54" layer="97">(Optional)
 External
 DS18B20</text>
-<text x="15.24" y="254" size="2.54" layer="97">Load Cell Amplifier</text>
+<text x="15.24" y="254" size="5.08" layer="97">Load Cell Amplifier</text>
 <text x="322.072" y="191.516" size="2.54" layer="97">7-Bit I2C: 0x49</text>
 <text x="23.368" y="195.834" size="1.778" layer="97">Screw
 Terminals</text>
@@ -27706,21 +27706,30 @@ Terminals</text>
 Serial Interface</text>
 <text x="137.16" y="238.76" size="1.778" layer="96">VBG = 1.25V</text>
 <text x="86.36" y="241.3" size="1.778" layer="96">AVDD = VBG(R1+R2)/R1</text>
-<text x="421.64" y="7.62" size="1.778" layer="94">v04</text>
+<text x="421.64" y="7.62" size="2.54" layer="94">v04</text>
 <text x="353.568" y="11.43" size="2.54" layer="94">N. Seidle</text>
 <text x="127" y="140.97" size="1.778" layer="97">Power the board with 4.5-5.5V</text>
-<text x="261.62" y="76.2" size="1.778" layer="97" font="vector">RED</text>
-<text x="261.62" y="73.66" size="1.778" layer="97" font="vector">WHT</text>
-<text x="261.62" y="71.12" size="1.778" layer="97" font="vector">BLK</text>
-<text x="266.7" y="66.04" size="1.778" layer="97" font="vector">UL</text>
-<text x="289.56" y="60.96" size="1.778" layer="97" font="vector">UR</text>
-<text x="312.42" y="55.88" size="1.778" layer="97">LL</text>
-<text x="337.82" y="50.8" size="1.778" layer="97" font="vector">LR</text>
-<text x="358.14" y="48.26" size="1.778" layer="97">Combine 4 Load sensors to create 1 load cell</text>
-<text x="200.66" y="78.74" size="2.54" layer="97" font="vector">Load Sensor Combiner</text>
+<text x="205.74" y="66.04" size="1.778" layer="97" font="vector">RED</text>
+<text x="205.74" y="63.5" size="1.778" layer="97" font="vector">WHT</text>
+<text x="205.74" y="60.96" size="1.778" layer="97" font="vector">BLK</text>
+<text x="210.82" y="55.88" size="1.778" layer="97" font="vector">UL</text>
+<text x="233.68" y="50.8" size="1.778" layer="97" font="vector">UR</text>
+<text x="256.54" y="45.72" size="1.778" layer="97">LL</text>
+<text x="281.94" y="40.64" size="1.778" layer="97" font="vector">LR</text>
+<text x="205.74" y="27.94" size="3.81" layer="97">Combine 4 Load sensors to create 1 load cell</text>
+<text x="185.42" y="78.74" size="5.08" layer="97" font="vector">Load Sensor Combiner</text>
 <text x="139.7" y="251.46" size="1.778" layer="97">Default: Jumper closed to provide 5V to DVDD. 
 Solder tother side open currently soldered side 
 for 3.3V to be supplied by customer. </text>
+<text x="331.47" y="7.366" size="2.54" layer="94">Revision by:   Mary West</text>
+<wire x1="0" y1="160.02" x2="180.34" y2="160.02" width="0.1524" layer="97" style="shortdash"/>
+<wire x1="180.34" y1="160.02" x2="236.22" y2="160.02" width="0.1524" layer="97" style="shortdash"/>
+<wire x1="236.22" y1="160.02" x2="431.8" y2="160.02" width="0.1524" layer="97" style="shortdash"/>
+<wire x1="180.34" y1="160.02" x2="180.34" y2="0" width="0.1524" layer="97" style="shortdash"/>
+<wire x1="182.88" y1="88.9" x2="431.8" y2="88.9" width="0.1524" layer="97" style="shortdash"/>
+<wire x1="431.8" y1="88.9" x2="431.8" y2="86.36" width="0.1524" layer="97" style="shortdash"/>
+<wire x1="233.68" y1="279.4" x2="236.22" y2="279.4" width="0.1524" layer="97" style="shortdash"/>
+<wire x1="236.22" y1="279.4" x2="236.22" y2="160.02" width="0.1524" layer="97" style="shortdash"/>
 </plain>
 <instances>
 <instance part="GND2" gate="1" x="127" y="17.78"/>
@@ -27797,8 +27806,8 @@ for 3.3V to be supplied by customer. </text>
 <instance part="GND4" gate="1" x="312.42" y="200.66"/>
 <instance part="SUPPLY1" gate="G$1" x="322.58" y="218.44"/>
 <instance part="SUPPLY2" gate="G$1" x="312.42" y="215.9"/>
-<instance part="LOGO2" gate="G$1" x="314.96" y="12.7"/>
-<instance part="LOGO4" gate="G$1" x="241.3" y="0"/>
+<instance part="LOGO2" gate="G$1" x="342.9" y="45.72"/>
+<instance part="LOGO4" gate="G$1" x="356.87" y="35.56"/>
 <instance part="R8" gate="G$1" x="386.08" y="218.44" rot="R90"/>
 <instance part="R9" gate="G$1" x="358.14" y="223.52" rot="R90"/>
 <instance part="SUPPLY3" gate="G$1" x="386.08" y="231.14"/>
@@ -27871,10 +27880,10 @@ for 3.3V to be supplied by customer. </text>
 <attribute name="NAME" x="104.14" y="231.14" size="1.778" layer="95"/>
 <attribute name="VALUE" x="104.14" y="226.06" size="1.778" layer="96"/>
 </instance>
-<instance part="J2" gate="J$1" x="269.24" y="73.66"/>
-<instance part="J3" gate="J$1" x="292.1" y="68.58"/>
-<instance part="J4" gate="J$1" x="312.42" y="63.5"/>
-<instance part="J5" gate="J$1" x="337.82" y="58.42"/>
+<instance part="J2" gate="J$1" x="213.36" y="63.5"/>
+<instance part="J3" gate="J$1" x="236.22" y="58.42"/>
+<instance part="J4" gate="J$1" x="256.54" y="53.34"/>
+<instance part="J5" gate="J$1" x="281.94" y="48.26"/>
 <instance part="U$6" gate="G$1" x="180.34" y="241.3"/>
 <instance part="J1" gate="G$1" x="187.96" y="243.84" rot="R270"/>
 <instance part="JP6" gate="G$1" x="180.34" y="228.6" smashed="yes" rot="R270">
@@ -27885,7 +27894,7 @@ for 3.3V to be supplied by customer. </text>
 <instance part="R10" gate="G$1" x="325.12" y="134.62" rot="R90"/>
 <instance part="R18" gate="G$1" x="347.98" y="134.62" rot="R90"/>
 <instance part="U$13" gate="G$1" x="347.98" y="142.24"/>
-<instance part="GND23" gate="1" x="281.94" y="45.72"/>
+<instance part="GND23" gate="1" x="226.06" y="35.56"/>
 </instances>
 <busses>
 </busses>
@@ -28069,9 +28078,9 @@ for 3.3V to be supplied by customer. </text>
 </segment>
 <segment>
 <pinref part="J2" gate="J$1" pin="3"/>
-<wire x1="276.86" y1="76.2" x2="281.94" y2="76.2" width="0.1524" layer="91"/>
+<wire x1="220.98" y1="66.04" x2="226.06" y2="66.04" width="0.1524" layer="91"/>
 <pinref part="GND23" gate="1" pin="GND"/>
-<wire x1="281.94" y1="76.2" x2="281.94" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="226.06" y1="66.04" x2="226.06" y2="38.1" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="RST" class="0">
@@ -28486,8 +28495,8 @@ for 3.3V to be supplied by customer. </text>
 </segment>
 <segment>
 <pinref part="J5" gate="J$1" pin="3"/>
-<wire x1="345.44" y1="60.96" x2="350.52" y2="60.96" width="0.1524" layer="91"/>
-<label x="350.52" y="60.96" size="1.27" layer="95" xref="yes"/>
+<wire x1="289.56" y1="50.8" x2="294.64" y2="50.8" width="0.1524" layer="91"/>
+<label x="294.64" y="50.8" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="N$9" class="0">
@@ -28543,19 +28552,19 @@ for 3.3V to be supplied by customer. </text>
 </segment>
 <segment>
 <pinref part="J3" gate="J$1" pin="3"/>
-<wire x1="299.72" y1="71.12" x2="304.8" y2="71.12" width="0.1524" layer="91"/>
-<label x="304.8" y="71.12" size="1.27" layer="95" xref="yes"/>
+<wire x1="243.84" y1="60.96" x2="248.92" y2="60.96" width="0.1524" layer="91"/>
+<label x="248.92" y="60.96" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="2" class="0">
 <segment>
 <pinref part="J4" gate="J$1" pin="2"/>
-<wire x1="320.04" y1="63.5" x2="327.66" y2="63.5" width="0.1524" layer="91"/>
-<wire x1="327.66" y1="63.5" x2="327.66" y2="68.58" width="0.1524" layer="91"/>
-<wire x1="327.66" y1="68.58" x2="363.22" y2="68.58" width="0.1524" layer="91"/>
-<wire x1="363.22" y1="68.58" x2="363.22" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="264.16" y1="53.34" x2="271.78" y2="53.34" width="0.1524" layer="91"/>
+<wire x1="271.78" y1="53.34" x2="271.78" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="271.78" y1="58.42" x2="307.34" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="307.34" y1="58.42" x2="307.34" y2="48.26" width="0.1524" layer="91"/>
 <pinref part="J5" gate="J$1" pin="2"/>
-<wire x1="363.22" y1="58.42" x2="345.44" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="307.34" y1="48.26" x2="289.56" y2="48.26" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$12" class="0">
@@ -28742,40 +28751,40 @@ for 3.3V to be supplied by customer. </text>
 <net name="N$20" class="0">
 <segment>
 <pinref part="J2" gate="J$1" pin="2"/>
-<wire x1="276.86" y1="73.66" x2="287.02" y2="73.66" width="0.1524" layer="91"/>
-<wire x1="287.02" y1="73.66" x2="287.02" y2="78.74" width="0.1524" layer="91"/>
-<wire x1="287.02" y1="78.74" x2="302.26" y2="78.74" width="0.1524" layer="91"/>
-<wire x1="302.26" y1="78.74" x2="302.26" y2="68.58" width="0.1524" layer="91"/>
+<wire x1="220.98" y1="63.5" x2="231.14" y2="63.5" width="0.1524" layer="91"/>
+<wire x1="231.14" y1="63.5" x2="231.14" y2="68.58" width="0.1524" layer="91"/>
+<wire x1="231.14" y1="68.58" x2="246.38" y2="68.58" width="0.1524" layer="91"/>
+<wire x1="246.38" y1="68.58" x2="246.38" y2="58.42" width="0.1524" layer="91"/>
 <pinref part="J3" gate="J$1" pin="2"/>
-<wire x1="299.72" y1="68.58" x2="302.26" y2="68.58" width="0.1524" layer="91"/>
+<wire x1="243.84" y1="58.42" x2="246.38" y2="58.42" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$22" class="0">
 <segment>
 <pinref part="J2" gate="J$1" pin="1"/>
-<wire x1="276.86" y1="71.12" x2="276.86" y2="53.34" width="0.1524" layer="91"/>
-<wire x1="276.86" y1="53.34" x2="322.58" y2="53.34" width="0.1524" layer="91"/>
-<wire x1="322.58" y1="53.34" x2="322.58" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="220.98" y1="60.96" x2="220.98" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="220.98" y1="43.18" x2="266.7" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="266.7" y1="43.18" x2="266.7" y2="50.8" width="0.1524" layer="91"/>
 <pinref part="J4" gate="J$1" pin="1"/>
-<wire x1="322.58" y1="60.96" x2="320.04" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="266.7" y1="50.8" x2="264.16" y2="50.8" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$24" class="0">
 <segment>
 <pinref part="J3" gate="J$1" pin="1"/>
-<wire x1="299.72" y1="66.04" x2="302.26" y2="66.04" width="0.1524" layer="91"/>
-<wire x1="302.26" y1="66.04" x2="302.26" y2="48.26" width="0.1524" layer="91"/>
-<wire x1="302.26" y1="48.26" x2="347.98" y2="48.26" width="0.1524" layer="91"/>
-<wire x1="347.98" y1="48.26" x2="347.98" y2="55.88" width="0.1524" layer="91"/>
+<wire x1="243.84" y1="55.88" x2="246.38" y2="55.88" width="0.1524" layer="91"/>
+<wire x1="246.38" y1="55.88" x2="246.38" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="246.38" y1="38.1" x2="292.1" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="292.1" y1="38.1" x2="292.1" y2="45.72" width="0.1524" layer="91"/>
 <pinref part="J5" gate="J$1" pin="1"/>
-<wire x1="347.98" y1="55.88" x2="345.44" y2="55.88" width="0.1524" layer="91"/>
+<wire x1="292.1" y1="45.72" x2="289.56" y2="45.72" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="A+" class="0">
 <segment>
 <pinref part="J4" gate="J$1" pin="3"/>
-<wire x1="320.04" y1="66.04" x2="322.58" y2="66.04" width="0.1524" layer="91"/>
-<label x="322.58" y="66.04" size="1.27" layer="95" xref="yes"/>
+<wire x1="264.16" y1="55.88" x2="266.7" y2="55.88" width="0.1524" layer="91"/>
+<label x="266.7" y="55.88" size="1.27" layer="95" xref="yes"/>
 </segment>
 <segment>
 <pinref part="R4" gate="G$1" pin="1"/>
