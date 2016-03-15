@@ -27685,7 +27685,7 @@ Noise floor doubles to 90nV</text>
 <text x="15.24" y="220.98" size="1.778" layer="97">Green or Blue</text>
 <text x="15.24" y="231.14" size="1.778" layer="97">Common Load
 Cell Colors:</text>
-<text x="309.88" y="254" size="5.08" layer="97">Temperature Compensation</text>
+<text x="251.46" y="264.16" size="5.08" layer="97">Temperature Compensation</text>
 <text x="240.792" y="197.358" size="2.54" layer="97">(Optional)
 External
 DS18B20</text>
@@ -28461,14 +28461,10 @@ for 3.3V to be supplied by customer. </text>
 <pinref part="C12" gate="G$1" pin="2"/>
 <wire x1="60.96" y1="228.6" x2="48.26" y2="228.6" width="0.1524" layer="91"/>
 <wire x1="99.06" y1="228.6" x2="86.36" y2="228.6" width="0.1524" layer="91"/>
-<wire x1="86.36" y1="228.6" x2="73.66" y2="228.6" width="0.1524" layer="91"/>
-<wire x1="73.66" y1="228.6" x2="60.96" y2="228.6" width="0.1524" layer="91"/>
+<wire x1="86.36" y1="228.6" x2="60.96" y2="228.6" width="0.1524" layer="91"/>
 <wire x1="48.26" y1="203.2" x2="60.96" y2="203.2" width="0.1524" layer="91"/>
 <wire x1="60.96" y1="203.2" x2="60.96" y2="228.6" width="0.1524" layer="91"/>
 <junction x="60.96" y="228.6"/>
-<wire x1="73.66" y1="228.6" x2="73.66" y2="231.14" width="0.1524" layer="91"/>
-<junction x="73.66" y="228.6"/>
-<label x="73.66" y="231.14" size="1.27" layer="95" rot="R90" xref="yes"/>
 <wire x1="86.36" y1="223.52" x2="86.36" y2="228.6" width="0.1524" layer="91"/>
 <junction x="86.36" y="228.6"/>
 <wire x1="99.06" y1="223.52" x2="99.06" y2="228.6" width="0.1524" layer="91"/>
@@ -28477,6 +28473,7 @@ for 3.3V to be supplied by customer. </text>
 <pinref part="L1" gate="G$1" pin="1"/>
 <wire x1="101.6" y1="228.6" x2="99.06" y2="228.6" width="0.1524" layer="91"/>
 <junction x="99.06" y="228.6"/>
+<label x="63.5" y="228.6" size="1.27" layer="95"/>
 </segment>
 <segment>
 <pinref part="J5" gate="J$1" pin="3"/>
