@@ -163,12 +163,6 @@
 <text x="-2.54" y="-2.54" size="1.778" layer="96">&gt;VALUE</text>
 <pin name="GND" x="0" y="2.54" visible="off" length="short" direction="sup" rot="R270"/>
 </symbol>
-<symbol name="VCC2">
-<wire x1="0.762" y1="1.27" x2="0" y2="2.54" width="0.254" layer="94"/>
-<wire x1="0" y1="2.54" x2="-0.762" y2="1.27" width="0.254" layer="94"/>
-<text x="-1.016" y="3.556" size="1.778" layer="96">&gt;VALUE</text>
-<pin name="VCC" x="0" y="0" visible="off" length="short" direction="sup" rot="R90"/>
-</symbol>
 <symbol name="5V">
 <wire x1="0.762" y1="1.27" x2="0" y2="2.54" width="0.254" layer="94"/>
 <wire x1="0" y1="2.54" x2="-0.762" y2="1.27" width="0.254" layer="94"/>
@@ -181,19 +175,6 @@
 <description>&lt;b&gt;SUPPLY SYMBOL&lt;/b&gt;</description>
 <gates>
 <gate name="1" symbol="GND" x="0" y="0"/>
-</gates>
-<devices>
-<device name="">
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="VCC" prefix="P+">
-<description>&lt;b&gt;SUPPLY SYMBOL&lt;/b&gt;</description>
-<gates>
-<gate name="1" symbol="VCC2" x="0" y="0"/>
 </gates>
 <devices>
 <device name="">
@@ -25433,6 +25414,17 @@ INDUCTOR POWER 3.3UH 4.0A SMD&lt;br&gt;
 </technology>
 </technologies>
 </device>
+<device name="0805-IND" package="0805">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="PROD_ID" value="NDUC-13076" constant="no"/>
+</technology>
+</technologies>
+</device>
 </devices>
 </deviceset>
 <deviceset name="JUMPER-PAD-3-2OF3_NC_BY_PASTE" prefix="JP">
@@ -27566,7 +27558,7 @@ MMBT4403 - 40V 600mA SOT-23 (TRANS-09245)</description>
 <part name="GND16" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND17" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND19" library="SparkFun" deviceset="GND" device=""/>
-<part name="P+11" library="SparkFun" deviceset="VCC" device="" value="3.3V"/>
+<part name="P+11" library="SparkFun-Aesthetics" deviceset="3.3V" device="" value="3.3V"/>
 <part name="GND21" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND22" library="SparkFun" deviceset="GND" device=""/>
 <part name="D1" library="SparkFun-LED" deviceset="LED-YELLOW" device="1206" value="YELLOW"/>
@@ -27605,7 +27597,7 @@ MMBT4403 - 40V 600mA SOT-23 (TRANS-09245)</description>
 <part name="U$7" library="SparkFun" deviceset="5V" device=""/>
 <part name="U$8" library="SparkFun" deviceset="5V" device=""/>
 <part name="U$9" library="SparkFun" deviceset="5V" device=""/>
-<part name="JP1" library="SparkFun-Connectors" deviceset="M03" device="1X03_NO_SILK"/>
+<part name="JP1" library="SparkFun-Connectors" deviceset="M03" device="1X03_NO_SILK" value="Temp"/>
 <part name="U$16" library="SparkFun" deviceset="5V" device=""/>
 <part name="GND1" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="U3" library="SparkFun-Sensors" deviceset="TMP102" device="" value="TMP102"/>
@@ -27623,7 +27615,7 @@ MMBT4403 - 40V 600mA SOT-23 (TRANS-09245)</description>
 <part name="SUPPLY5" library="SparkFun-Aesthetics" deviceset="3.3V" device=""/>
 <part name="Y2" library="SparkFun-FreqCtrl" deviceset="RESONATOR" device="16MHZ" value="16MHZ"/>
 <part name="SJ2" library="SparkFun-Passives" deviceset="JUMPER-PAD-2-NC_BY_PASTE" device="" value="JUMPER-PAD-2-NC_BY_PASTE"/>
-<part name="JP2" library="SparkFun-Connectors" deviceset="M02" device="PTH"/>
+<part name="JP2" library="SparkFun-Connectors" deviceset="M02" device="PTH" value="Fixed Gain 32"/>
 <part name="C16" library="SparkFun-Capacitors" deviceset="0.1UF-25V(+80/-20%)(0603)" device="" value="0.1uF"/>
 <part name="GND27" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="GND28" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
@@ -27659,15 +27651,15 @@ MMBT4403 - 40V 600mA SOT-23 (TRANS-09245)</description>
 <part name="GND20" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="LOGO3" library="SparkFun-Aesthetics" deviceset="SFE_LOGO_FLAME" device=".1_INCH" value="SFE_LOGO_FLAME.1_INCH"/>
 <part name="JP4" library="SparkFun-Connectors" deviceset="M03" device="SCREW_LOCK" value="Screw"/>
-<part name="JP3" library="SparkFun-Connectors" deviceset="M05" device="NO_SILK"/>
-<part name="JP11" library="SparkFun-Connectors" deviceset="M05" device="SCREW"/>
-<part name="L1" library="SparkFun-Passives" deviceset="INDUCTOR" device="0805" value="3.3uH"/>
-<part name="J2" library="SparkFun-Connectors" deviceset="M03" device="PTH"/>
-<part name="J3" library="SparkFun-Connectors" deviceset="M03" device="PTH"/>
-<part name="J4" library="SparkFun-Connectors" deviceset="M03" device="PTH"/>
-<part name="J5" library="SparkFun-Connectors" deviceset="M03" device="PTH"/>
+<part name="JP3" library="SparkFun-Connectors" deviceset="M05" device="NO_SILK" value="Load"/>
+<part name="JP11" library="SparkFun-Connectors" deviceset="M05" device="SCREW" value="Screw Terminals"/>
+<part name="L1" library="SparkFun-Passives" deviceset="INDUCTOR" device="0805-IND" value="3.3uH"/>
+<part name="J2" library="SparkFun-Connectors" deviceset="M03" device="PTH" value="UL"/>
+<part name="J3" library="SparkFun-Connectors" deviceset="M03" device="PTH" value="UR"/>
+<part name="J4" library="SparkFun-Connectors" deviceset="M03" device="PTH" value="LL"/>
+<part name="J5" library="SparkFun-Connectors" deviceset="M03" device="PTH" value="LR"/>
 <part name="U$6" library="SparkFun" deviceset="5V" device=""/>
-<part name="J1" library="SparkFun-Connectors" deviceset="M01" device="PTH"/>
+<part name="J1" library="SparkFun-Connectors" deviceset="M01" device="PTH" value="3.3V"/>
 <part name="JP6" library="SparkFun-Passives" deviceset="JUMPER-PAD-3-2OF3_NC_BY_PASTE" device=""/>
 <part name="Q4" library="SparkFun-DiscreteSemi" deviceset="MOSFET-NCHANNEL" device="2N7002PW"/>
 <part name="R10" library="SparkFun-Resistors" deviceset="10KOHM-1/10W-1%(0603)" device="0603" value="10K"/>
@@ -27699,8 +27691,6 @@ External
 DS18B20</text>
 <text x="15.24" y="254" size="5.08" layer="97">Load Cell Amplifier</text>
 <text x="322.072" y="191.516" size="2.54" layer="97">7-Bit I2C: 0x49</text>
-<text x="23.368" y="195.834" size="1.778" layer="97">Screw
-Terminals</text>
 <text x="27.94" y="218.44" size="1.778" layer="97">Shield</text>
 <text x="142.494" y="102.362" size="1.778" layer="97">Optional External
 Serial Interface</text>
@@ -27712,10 +27702,6 @@ Serial Interface</text>
 <text x="205.74" y="66.04" size="1.778" layer="97" font="vector">RED</text>
 <text x="205.74" y="63.5" size="1.778" layer="97" font="vector">WHT</text>
 <text x="205.74" y="60.96" size="1.778" layer="97" font="vector">BLK</text>
-<text x="210.82" y="55.88" size="1.778" layer="97" font="vector">UL</text>
-<text x="233.68" y="50.8" size="1.778" layer="97" font="vector">UR</text>
-<text x="256.54" y="45.72" size="1.778" layer="97">LL</text>
-<text x="281.94" y="40.64" size="1.778" layer="97" font="vector">LR</text>
 <text x="205.74" y="27.94" size="3.81" layer="97">Combine 4 Load sensors to create 1 load cell</text>
 <text x="185.42" y="78.74" size="5.08" layer="97" font="vector">Load Sensor Combiner</text>
 <text x="139.7" y="251.46" size="1.778" layer="97">Default: Jumper closed to provide 5V to DVDD. 
@@ -27751,7 +27737,7 @@ for 3.3V to be supplied by customer. </text>
 <instance part="GND16" gate="1" x="276.86" y="104.14"/>
 <instance part="GND17" gate="1" x="287.02" y="104.14"/>
 <instance part="GND19" gate="1" x="218.44" y="121.92"/>
-<instance part="P+11" gate="1" x="276.86" y="142.24"/>
+<instance part="P+11" gate="G$1" x="276.86" y="142.24"/>
 <instance part="GND21" gate="1" x="256.54" y="104.14"/>
 <instance part="GND22" gate="1" x="266.7" y="104.14"/>
 <instance part="D1" gate="G$1" x="368.3" y="121.92"/>
@@ -27888,7 +27874,6 @@ for 3.3V to be supplied by customer. </text>
 <instance part="J1" gate="G$1" x="187.96" y="243.84" rot="R270"/>
 <instance part="JP6" gate="G$1" x="180.34" y="228.6" smashed="yes" rot="R270">
 <attribute name="NAME" x="182.88" y="226.441" size="1.778" layer="95"/>
-<attribute name="VALUE" x="154.94" y="234.315" size="1.778" layer="96"/>
 </instance>
 <instance part="Q4" gate="G$1" x="335.28" y="127" smashed="yes" rot="R270"/>
 <instance part="R10" gate="G$1" x="325.12" y="134.62" rot="R90"/>
@@ -28257,7 +28242,7 @@ for 3.3V to be supplied by customer. </text>
 <wire x1="289.56" y1="121.92" x2="276.86" y2="121.92" width="0.1524" layer="91"/>
 <wire x1="276.86" y1="121.92" x2="276.86" y2="116.84" width="0.1524" layer="91"/>
 <junction x="276.86" y="121.92"/>
-<pinref part="P+11" gate="1" pin="VCC"/>
+<pinref part="P+11" gate="G$1" pin="3.3V"/>
 <pinref part="C10" gate="G$1" pin="1"/>
 <pinref part="U6" gate="U$1" pin="!RESET"/>
 <pinref part="U6" gate="U$1" pin="3V3OUT"/>
