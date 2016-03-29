@@ -25717,6 +25717,8 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <smd name="1" x="-0.5" y="-0.66" dx="0.25" dy="0.4" layer="1"/>
 <smd name="4" x="0.5" y="0.66" dx="0.25" dy="0.4" layer="1"/>
 <smd name="6" x="-0.5" y="0.67" dx="0.25" dy="0.4" layer="1"/>
+<text x="-1.27" y="1.27" size="0.8128" layer="21">&gt;Name</text>
+<text x="1.27" y="-1.27" size="0.8128" layer="21">&gt;Value</text>
 </package>
 <package name="SOT563-2">
 <wire x1="-0.6" y1="-0.8" x2="0.6" y2="-0.8" width="0.127" layer="21"/>
@@ -27704,9 +27706,8 @@ Serial Interface</text>
 <text x="205.74" y="60.96" size="1.778" layer="97" font="vector">BLK</text>
 <text x="205.74" y="27.94" size="3.81" layer="97">Combine 4 Load sensors to create 1 load cell</text>
 <text x="185.42" y="78.74" size="5.08" layer="97" font="vector">Load Sensor Combiner</text>
-<text x="139.7" y="251.46" size="1.778" layer="97">Default: Jumper closed to provide 5V to DVDD. 
-Solder tother side open currently soldered side 
-for 3.3V to be supplied by customer. </text>
+<text x="160.02" y="248.92" size="1.778" layer="97">Default :Left side of Jumper closed to provide 5V to DVDD.
+Customer to close right side and provide 3.3V to J1. </text>
 <text x="331.47" y="7.366" size="2.54" layer="94">Revision by:   Mary West</text>
 <wire x1="0" y1="160.02" x2="180.34" y2="160.02" width="0.1524" layer="97" style="shortdash"/>
 <wire x1="180.34" y1="160.02" x2="236.22" y2="160.02" width="0.1524" layer="97" style="shortdash"/>
@@ -27786,7 +27787,10 @@ for 3.3V to be supplied by customer. </text>
 <instance part="JP1" gate="J$1" x="281.94" y="215.9" rot="R180"/>
 <instance part="U$16" gate="G$1" x="269.24" y="220.98"/>
 <instance part="GND1" gate="1" x="266.7" y="190.5"/>
-<instance part="U3" gate="G$1" x="337.82" y="210.82"/>
+<instance part="U3" gate="G$1" x="337.82" y="210.82" smashed="yes">
+<attribute name="NAME" x="330.2" y="219.202" size="1.778" layer="95"/>
+<attribute name="VALUE" x="330.2" y="200.66" size="1.778" layer="96"/>
+</instance>
 <instance part="GND18" gate="1" x="322.58" y="200.66"/>
 <instance part="C3" gate="G$1" x="312.42" y="208.28"/>
 <instance part="GND4" gate="1" x="312.42" y="200.66"/>
@@ -27826,8 +27830,8 @@ for 3.3V to be supplied by customer. </text>
 <instance part="GND12" gate="1" x="233.68" y="109.22"/>
 <instance part="U$10" gate="G$1" x="149.86" y="132.08"/>
 <instance part="GND13" gate="1" x="149.86" y="111.76"/>
-<instance part="R11" gate="G$1" x="322.58" y="154.94" rot="R180"/>
-<instance part="R12" gate="G$1" x="325.12" y="147.32" rot="R180"/>
+<instance part="R11" gate="G$1" x="327.66" y="154.94" rot="R180"/>
+<instance part="R12" gate="G$1" x="330.2" y="147.32" rot="R180"/>
 <instance part="U4" gate="U$1" x="101.6" y="73.66"/>
 <instance part="Q1" gate="G$1" x="365.76" y="215.9" smashed="yes" rot="R270">
 <attribute name="NAME" x="366.268" y="210.312" size="1.778" layer="95" rot="R270"/>
@@ -28108,9 +28112,9 @@ for 3.3V to be supplied by customer. </text>
 <pinref part="U4" gate="U$1" pin="PD0(RXD)"/>
 </segment>
 <segment>
-<label x="330.2" y="154.94" size="1.27" layer="95" xref="yes"/>
+<label x="337.82" y="154.94" size="1.27" layer="95" xref="yes"/>
 <pinref part="R11" gate="G$1" pin="1"/>
-<wire x1="327.66" y1="154.94" x2="330.2" y2="154.94" width="0.1524" layer="91"/>
+<wire x1="332.74" y1="154.94" x2="337.82" y2="154.94" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <wire x1="152.4" y1="124.46" x2="147.32" y2="124.46" width="0.1524" layer="91"/>
@@ -28125,8 +28129,8 @@ for 3.3V to be supplied by customer. </text>
 <pinref part="U4" gate="U$1" pin="PD1(TXD)"/>
 </segment>
 <segment>
-<label x="332.74" y="147.32" size="1.27" layer="95" xref="yes"/>
-<wire x1="330.2" y1="147.32" x2="332.74" y2="147.32" width="0.1524" layer="91"/>
+<label x="337.82" y="147.32" size="1.27" layer="95" xref="yes"/>
+<wire x1="335.28" y1="147.32" x2="337.82" y2="147.32" width="0.1524" layer="91"/>
 <pinref part="R12" gate="G$1" pin="1"/>
 </segment>
 <segment>
@@ -28169,10 +28173,10 @@ for 3.3V to be supplied by customer. </text>
 </segment>
 <segment>
 <pinref part="Q4" gate="G$1" pin="D"/>
-<wire x1="340.36" y1="127" x2="347.98" y2="127" width="0.2032" layer="91"/>
+<wire x1="340.36" y1="127" x2="347.98" y2="127" width="0.1524" layer="91"/>
 <pinref part="R18" gate="G$1" pin="1"/>
-<wire x1="347.98" y1="127" x2="353.06" y2="127" width="0.2032" layer="91"/>
-<wire x1="347.98" y1="129.54" x2="347.98" y2="127" width="0.2032" layer="91"/>
+<wire x1="347.98" y1="127" x2="353.06" y2="127" width="0.1524" layer="91"/>
+<wire x1="347.98" y1="129.54" x2="347.98" y2="127" width="0.1524" layer="91"/>
 <junction x="347.98" y="127"/>
 <label x="353.06" y="127" size="1.27" layer="95" xref="yes"/>
 </segment>
@@ -28440,7 +28444,7 @@ for 3.3V to be supplied by customer. </text>
 <segment>
 <pinref part="U$13" gate="G$1" pin="5V"/>
 <pinref part="R18" gate="G$1" pin="2"/>
-<wire x1="347.98" y1="142.24" x2="347.98" y2="139.7" width="0.2032" layer="91"/>
+<wire x1="347.98" y1="142.24" x2="347.98" y2="139.7" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="LC_DOUT" class="0">
@@ -28654,10 +28658,11 @@ for 3.3V to be supplied by customer. </text>
 </net>
 <net name="N$16" class="0">
 <segment>
-<pinref part="R11" gate="G$1" pin="2"/>
-<wire x1="317.5" y1="154.94" x2="317.5" y2="139.7" width="0.1524" layer="91"/>
 <wire x1="314.96" y1="139.7" x2="317.5" y2="139.7" width="0.1524" layer="91"/>
 <pinref part="U6" gate="U$1" pin="TXD"/>
+<pinref part="R11" gate="G$1" pin="2"/>
+<wire x1="322.58" y1="154.94" x2="317.5" y2="154.94" width="0.1524" layer="91"/>
+<wire x1="317.5" y1="154.94" x2="317.5" y2="139.7" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="LV_SCL" class="0">
@@ -28743,12 +28748,15 @@ for 3.3V to be supplied by customer. </text>
 </net>
 <net name="N$22" class="0">
 <segment>
-<pinref part="J2" gate="J$1" pin="1"/>
-<wire x1="220.98" y1="60.96" x2="220.98" y2="43.18" width="0.1524" layer="91"/>
-<wire x1="220.98" y1="43.18" x2="266.7" y2="43.18" width="0.1524" layer="91"/>
-<wire x1="266.7" y1="43.18" x2="266.7" y2="50.8" width="0.1524" layer="91"/>
+<wire x1="266.7" y1="40.64" x2="266.7" y2="43.18" width="0.1524" layer="91"/>
 <pinref part="J4" gate="J$1" pin="1"/>
+<wire x1="266.7" y1="45.72" x2="266.7" y2="50.8" width="0.1524" layer="91"/>
 <wire x1="266.7" y1="50.8" x2="264.16" y2="50.8" width="0.1524" layer="91"/>
+<pinref part="J2" gate="J$1" pin="1"/>
+<wire x1="220.98" y1="60.96" x2="231.14" y2="60.96" width="0.1524" layer="91"/>
+<wire x1="231.14" y1="60.96" x2="231.14" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="231.14" y1="40.64" x2="266.7" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="266.7" y1="43.18" x2="266.7" y2="45.72" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$24" class="0">
@@ -28800,9 +28808,10 @@ for 3.3V to be supplied by customer. </text>
 <net name="N$14" class="0">
 <segment>
 <pinref part="U6" gate="U$1" pin="RXD"/>
-<wire x1="314.96" y1="137.16" x2="320.04" y2="137.16" width="0.2032" layer="91"/>
+<wire x1="314.96" y1="137.16" x2="320.04" y2="137.16" width="0.1524" layer="91"/>
 <pinref part="R12" gate="G$1" pin="2"/>
-<wire x1="320.04" y1="137.16" x2="320.04" y2="147.32" width="0.2032" layer="91"/>
+<wire x1="325.12" y1="147.32" x2="320.04" y2="147.32" width="0.1524" layer="91"/>
+<wire x1="320.04" y1="147.32" x2="320.04" y2="137.16" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$27" class="0">
@@ -28819,10 +28828,10 @@ for 3.3V to be supplied by customer. </text>
 <net name="N$33" class="0">
 <segment>
 <pinref part="Q4" gate="G$1" pin="G"/>
-<wire x1="335.28" y1="134.62" x2="335.28" y2="142.24" width="0.2032" layer="91"/>
-<wire x1="335.28" y1="142.24" x2="325.12" y2="142.24" width="0.2032" layer="91"/>
+<wire x1="335.28" y1="134.62" x2="335.28" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="335.28" y1="142.24" x2="325.12" y2="142.24" width="0.1524" layer="91"/>
 <pinref part="R10" gate="G$1" pin="2"/>
-<wire x1="325.12" y1="142.24" x2="325.12" y2="139.7" width="0.2032" layer="91"/>
+<wire x1="325.12" y1="142.24" x2="325.12" y2="139.7" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
