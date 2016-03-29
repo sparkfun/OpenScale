@@ -27563,7 +27563,7 @@ MMBT4403 - 40V 600mA SOT-23 (TRANS-09245)</description>
 <part name="P+11" library="SparkFun-Aesthetics" deviceset="3.3V" device="" value="3.3V"/>
 <part name="GND21" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND22" library="SparkFun" deviceset="GND" device=""/>
-<part name="D1" library="SparkFun-LED" deviceset="LED-YELLOW" device="1206" value="YELLOW"/>
+<part name="D1" library="SparkFun-LED" deviceset="LED-YELLOW" device="LILYPAD" value="Yellow"/>
 <part name="D2" library="SparkFun-LED" deviceset="LED-GREEN" device="1206" value="GREEN"/>
 <part name="U$1" library="SparkFun" deviceset="5V" device=""/>
 <part name="U$3" library="SparkFun" deviceset="5V" device=""/>
