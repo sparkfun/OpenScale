@@ -8,7 +8,7 @@
 </settings>
 <grid distance="0.05" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.005" altunitdist="inch" altunit="inch"/>
 <layers>
-<layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
+<layer number="1" name="Top" color="4" fill="1" visible="no" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
 <layer number="3" name="Route3" color="4" fill="3" visible="no" active="no"/>
 <layer number="4" name="Route4" color="1" fill="4" visible="no" active="no"/>
@@ -2914,7 +2914,7 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <attribute name="PROD_ID" value="RES-00824" x="34.29" y="20.955" size="1.778" layer="27" font="vector" ratio="15" rot="R270" display="off"/>
 </element>
 <element name="LOGO1" library="SparkFun-Aesthetics" package="SFE_LOGO_NAME_FLAME_.1" value="SFE_LOGO_NAME_FLAME.1_INCH" x="4.8895" y="40.7035"/>
-<element name="LOGO5" library="SparkFun-Aesthetics" package="OSHW-LOGO-S" value="OSHW-LOGOS" x="12.446" y="2.667"/>
+<element name="LOGO5" library="SparkFun-Aesthetics" package="OSHW-LOGO-S" value="OSHW-LOGOS" x="12.446" y="3.937"/>
 <element name="C14" library="SparkFun-Capacitors" package="0603-CAP" value="0.1uF" x="48.768" y="23.114" rot="R180">
 <attribute name="PROD_ID" value="CAP-00810" x="48.768" y="23.114" size="1.778" layer="27" font="vector" ratio="15" rot="R180" display="off"/>
 </element>
@@ -3622,9 +3622,9 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <wire x1="32.0675" y1="31.4325" x2="32.0675" y2="32.0675" width="0.2032" layer="1"/>
 <wire x1="32.0675" y1="32.0675" x2="32.0675" y2="33.02" width="0.2032" layer="1"/>
 <wire x1="32.0675" y1="33.02" x2="34.6075" y2="35.56" width="0.2032" layer="1"/>
-<wire x1="20.685" y1="20.9525" x2="22.6425" y2="20.9525" width="0.2032" layer="1"/>
+<wire x1="20.685" y1="20.9525" x2="22.6425" y2="20.9525" width="0.508" layer="1"/>
 <wire x1="22.6425" y1="20.9525" x2="22.645" y2="20.955" width="0.2032" layer="1"/>
-<wire x1="22.645" y1="20.955" x2="22.645" y2="19.095" width="0.2032" layer="1"/>
+<wire x1="22.645" y1="20.955" x2="22.645" y2="19.095" width="0.508" layer="1"/>
 <wire x1="22.645" y1="19.095" x2="22.6" y2="19.05" width="0.2032" layer="1"/>
 <wire x1="33.02" y1="17.78" x2="33.235" y2="17.78" width="0.2032" layer="1"/>
 <via x="23.8125" y="18.7325" extent="1-16" drill="0.381"/>
