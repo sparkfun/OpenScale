@@ -30,11 +30,11 @@
  After power up OpenScale will try reading the load cell and output a weight value.
 
  If you get OpenScale stuck into an unknown baudrate, there is a safety mechanism built-in. Tie the RX pin
- to ground and power up OpenScale. You should see the status LED blink at 1Hz for 2 seconds. 
+ to ground and power up OpenScale. You should see the status LED blink at 1Hz for 2 seconds.
  Now power down OpenScale and remove the RX/GND jumper. OpenScale is now reset to 9600bps.
 
  To change the baud rate type 'x' to bring up configuration menu. Select the baud rate sub menu and enter
- the baud rate of your choice. You will then see a message for example 'Going to 9600bps...'. 
+ the baud rate of your choice. You will then see a message for example 'Going to 9600bps...'.
  You will need to power down OpenScale, change your system UART settings to match the new OpenScale
  baud rate and then power OpenScale back up.
 
@@ -73,49 +73,49 @@
  10.1 at 3:37PM re-calibrated
  9.39 at 6:19pm, recaled to 10.1
  9.67 at 9:19pm, recaled to 10.1
- 3/29 
+ 3/29
  8.94 at 8:27AM
- 
+
  3/31 wooden scale
  8:27am cal (96530) to 10.1
  8PM perfect 10.10. Adding 2nd coke, 20.24 (really good)
- 
+
  Need to duplicate with ehternet cable
- 
+
  Testing resistors:
  wooden: grn/white and red/black are 1k. Every other combo is 750
  metal: grn/white and red/blk are 2k. Every other combo is 1.5k
- 
+
  3/31 More testing with metal scale
  9:45PM cal (-6353) to 10.1
- 
+
  4/2 Testing with wooden + ehternet cable
  8:34AM cal to 10.1 (-96179)
- 
+
  4/3 Testing with wooden + ehternet cable
  7PM 9.89 seems pretty close
  recal to 10.1 (-93261)
  9:30AM 10.07. Nice. Works!
- 
+
  Ethernet cable to wooden works after a few hour cal
- 
+
  Arduino library properties file in github, send to bogde as pull request
  arduino.cc
 
  5/21/2015
  Testing with actual beehive
- 90lbs on 2:42, cal 5204, 5197 
- 
- 5/30 
+ 90lbs on 2:42, cal 5204, 5197
+
+ 5/30
  Inductor in place, new scale, tare is 8241063
- 
+
  6/15
  Beehive testing
  9319059 with block and two plates
  9153662/549 with two plates
  8925275/702 with one plate
  8698034/7958 with no plate
- 
+
  */
 
 #include <HX711.h> //Library created by bogde
@@ -141,6 +141,9 @@ boolean setting_remote_temp_enable; //Prints the remote temperature in C
 boolean setting_status_enable; //Turns on/off the blinking status LED
 boolean setting_serial_trigger_enable; //Takes reading when serial character is received
 boolean setting_raw_reading_enable; //Prints the raw, 24bit, long from the HX711, ex: 8355808
+byte setting_trigger_character; //The character that will cause OpenScale to report a reading
+
+boolean setupMode = false; //This is set to true if user presses x
 
 const byte escape_character = 'x'; //This is the ASCII character we look for to break reporting
 const int minimum_powercycle_time = 500; //Anything less than 500 can cause reading problems
@@ -160,7 +163,7 @@ void setup()
   //{
   //  EEPROM.write(x, 0xFF);
   //}
-  
+
   Wire.begin();
 
   readSystemSettings(); //Load all system settings from EEPROM
@@ -189,13 +192,12 @@ void setup()
   Serial.println(F(" to bring up settings"));
 
   Serial.println(F("Readings:"));
-  
 }
 
 void loop()
 {
   //Power cycle takes around 400ms so only do so if our report rate is greater than 500ms
-  if(setting_report_rate > minimum_powercycle_time) powerUpScale();
+  if (setting_report_rate > minimum_powercycle_time) powerUpScale();
 
   long startTime = millis();
 
@@ -217,7 +219,7 @@ void loop()
   Serial.print(F(","));
 
   //Print raw reading
-  if(setting_raw_reading_enable == true)
+  if (setting_raw_reading_enable == true)
   {
     long rawReading = scale.read_average(setting_average_amount); //Take average reading over a given number of times
 
@@ -246,13 +248,13 @@ void loop()
     }
   }
 
-  if(setting_status_enable == true) toggleLED();
+  if (setting_status_enable == true) toggleLED();
 
   Serial.println();
   Serial.flush();
 
   //This takes time so put it after we have printed the report
-  if(setting_report_rate > minimum_powercycle_time) powerDownScale();
+  if (setting_report_rate > minimum_powercycle_time) powerDownScale();
 
   //Hang out until the end of this report period
   while (1)
@@ -262,30 +264,45 @@ void loop()
     {
       toggleLED();
       char incoming = Serial.read();
-      if (incoming == escape_character)
-      {
-        //Power cycle takes 400ms so only do so if our report rate is less than 400ms
-        if(setting_report_rate > minimum_powercycle_time) powerUpScale();
-        system_setup();
-        if(setting_report_rate > minimum_powercycle_time) powerDownScale;
-      }
-      if(setting_status_enable == false) digitalWrite(statusLED, LOW); //Turn off LED
 
+      if (incoming == escape_character) setupMode = true;
     }
 
     if ((millis() - startTime) >= setting_report_rate) break;
   }
-  
+
   //If we are serially triggered then wait for incoming character
   if (setting_serial_trigger_enable == true)
   {
-    powerDownScale();    
-    while(Serial.available() == false) delay(1);
-    //Do nothing with the character
-    
-    //We could go into deep sleep here. This would save 10-20mA.
+    powerDownScale();
+
+    char incoming = 0;
+
+    //Wait for a trigger character or x from user
+    while (incoming != setting_trigger_character && incoming != 'x')
+    {
+      while (Serial.available() == false) delay(1);
+      //We could go into deep sleep here. This would save 10-20mA.
+
+      incoming = Serial.read();
+      if (incoming == escape_character) setupMode = true;
+    }
+
     powerUpScale();
   }
+
+  //If the user has pressed x go into system setup
+  if (setupMode == true)
+  {
+    //Power cycle takes 400ms so only do so if our report rate is less than 400ms
+    if (setting_report_rate > minimum_powercycle_time) powerUpScale();
+    system_setup();
+    if (setting_report_rate > minimum_powercycle_time) powerDownScale;
+    setupMode = false;
+
+    if (setting_status_enable == false) digitalWrite(statusLED, LOW); //Turn off LED
+  }
+
 }
 
 void powerUpScale(void)
@@ -366,6 +383,10 @@ void system_setup(void)
     else Serial.print(F("ff"));
     Serial.println(F("]"));
 
+    Serial.print(F("c) Trigger character: ["));
+    Serial.print(setting_trigger_character);
+    Serial.println(F("]"));
+
     Serial.println(F("x) Exit"));
     Serial.print(F(">"));
 
@@ -383,20 +404,20 @@ void system_setup(void)
 
       scale.tare(); //Reset the scale to 0
 
-      
+
       setting_tare_point = scale.read_average(10); //Get 10 readings from the HX711 and average them
       Serial.print(F("\n\rTare point 1: "));
       Serial.println(setting_tare_point);
 
       //Try a different method
       setting_tare_point = 0;
-      for(int x = 0 ; x < 10 ; x++)
+      for (int x = 0 ; x < 10 ; x++)
       {
         setting_tare_point += scale.read(); //Get a reading
         delay(100);
       }
       setting_tare_point /= 10;
-        
+
       Serial.print(F("\n\rTare point 2: "));
       Serial.println(setting_tare_point);
 
@@ -534,6 +555,20 @@ void system_setup(void)
         Serial.println(F("n"));
         setting_raw_reading_enable = true;
       }
+      record_system_settings();
+    }
+    else if (command == 'c')
+    {
+      Serial.print(F("\n\rEnter new trigger character: "));
+
+      while (Serial.available() == false) delay(1);
+
+      setting_trigger_character = Serial.read();
+
+      Serial.println();
+      Serial.print(F("\n\rNew character: "));
+      Serial.print(setting_trigger_character);
+
       record_system_settings();
     }
     else if (command == 'x')
@@ -687,9 +722,9 @@ int calcMinimumReadTime(void)
   //Calculate number of characters per report
   int characters = 0;
 
-  if(setting_timestamp_enable == true) characters += strlen("51588595,"); //Timestamp has characters
+  if (setting_timestamp_enable == true) characters += strlen("51588595,"); //Timestamp has characters
 
-  if(setting_local_temp_enable)
+  if (setting_local_temp_enable)
   {
     //Establish how much time it takes to do a local temp read
     long startTime = millis();
@@ -697,11 +732,11 @@ int calcMinimumReadTime(void)
       getLocalTemperature(); //Do a dummy read and time it
     averageReadTime = ceil((millis() - startTime) / (float)8);
     sensorReadTime += averageReadTime; //In ms
-    
+
     characters += strlen("24.75,"); //Add the time it takes to print the characters as well
   }
-  
-  if(setting_remote_temp_enable)
+
+  if (setting_remote_temp_enable)
   {
     //Establish how much time it takes to do a remote temp read
     long startTime = millis();
@@ -715,12 +750,12 @@ int calcMinimumReadTime(void)
 
   characters += strlen("123,"); //Basic weight without decimals
 
-  if(setting_decimal_places > 0) characters += setting_decimal_places + 1; //For example 4: 3 decimal places and the '.'
+  if (setting_decimal_places > 0) characters += setting_decimal_places + 1; //For example 4: 3 decimal places and the '.'
 
-  if(setting_units == UNITS_LBS) characters += strlen("lbs");
-  if(setting_units == UNITS_KG) characters += strlen("kg");
+  if (setting_units == UNITS_LBS) characters += strlen("lbs");
+  if (setting_units == UNITS_KG) characters += strlen("kg");
 
-  if(setting_raw_reading_enable == true)
+  if (setting_raw_reading_enable == true)
   {
     long rawReading = scale.read_average(setting_average_amount); //Take average reading over a given number of times
 
@@ -735,7 +770,7 @@ int calcMinimumReadTime(void)
 
   //Serial.print("characterTime: ");
   //Serial.println(ceil((float)characters * characterTime));
-  
+
   //Combine the total amount of sensor read time with the time it takes to print all the characters
   return (sensorReadTime + ceil((float)characters * characterTime));
 }
@@ -936,7 +971,7 @@ float getRemoteTemperature()
   //https://www.sparkfun.com/products/11050
   boolean type_s = false;
 
-  //This was moved to the end of the function. We will be calling this function many times so reset the 
+  //This was moved to the end of the function. We will be calling this function many times so reset the
   //sensor and then tell it to do a temp conversion. This removes the need to delay for a sensor reading.
   remoteSensor.reset();
   remoteSensor.select(remoteSensorAddress); //The address is found at power on
@@ -1037,7 +1072,7 @@ void displaySystemHeader(void)
     remoteSensorAttached = true;
     Serial.println(F("Remote temperature sensor detected"));
   }
-  
+
 }
 
 //Resets all the system settings to safe values
@@ -1072,15 +1107,18 @@ void set_default_settings(void)
 
   //Reset remote temp
   setting_remote_temp_enable = true;
-  
+
   //Reset LED blinking
   setting_status_enable = true;
 
   //Reset serial trigger
   setting_serial_trigger_enable = false;
-  
+
   //Reset raw reading
   setting_raw_reading_enable = false;
+
+  //Reset trigger character
+  setting_trigger_character = '!';
 
   //Commit these new settings to memory
   record_system_settings();
@@ -1108,12 +1146,14 @@ void record_system_settings(void)
   EEPROM.write(LOCATION_LOCAL_TEMP_ENABLE, setting_local_temp_enable);
 
   EEPROM.write(LOCATION_REMOTE_TEMP_ENABLE, setting_remote_temp_enable);
-  
+
   EEPROM.write(LOCATION_STATUS_ENABLE, setting_status_enable);
 
   EEPROM.write(LOCATION_SERIAL_TRIGGER_ENABLE, setting_serial_trigger_enable);
-  
+
   EEPROM.write(LOCATION_RAW_READING_ENABLE, setting_raw_reading_enable);
+
+  EEPROM.write(LOCATION_TRIGGER_CHARACTER, setting_trigger_character);
 }
 
 //Reads the current system settings from EEPROM
@@ -1215,7 +1255,7 @@ void readSystemSettings(void)
     setting_serial_trigger_enable = false; //Default to false
     EEPROM.write(LOCATION_SERIAL_TRIGGER_ENABLE, setting_serial_trigger_enable);
   }
-  
+
   //Look up if we need to output the raw reading
   setting_raw_reading_enable = EEPROM.read(LOCATION_RAW_READING_ENABLE);
   if (setting_raw_reading_enable > 1)
@@ -1223,7 +1263,15 @@ void readSystemSettings(void)
     setting_raw_reading_enable = false; //Default to false
     EEPROM.write(LOCATION_RAW_READING_ENABLE, setting_raw_reading_enable);
   }
-  
+
+  //Look up the character to trigger a reading
+  setting_trigger_character = EEPROM.read(LOCATION_TRIGGER_CHARACTER);
+  if (setting_trigger_character == 255)
+  {
+    setting_trigger_character = '!'; //Default to !
+    EEPROM.write(LOCATION_TRIGGER_CHARACTER, setting_trigger_character);
+  }
+
 }
 
 //Record a series of bytes to EEPROM starting at address
