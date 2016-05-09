@@ -27544,7 +27544,6 @@ MMBT4403 - 40V 600mA SOT-23 (TRANS-09245)</description>
 </class>
 </classes>
 <parts>
-<part name="GND2" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND5" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND6" library="SparkFun" deviceset="GND" device=""/>
 <part name="GND7" library="SparkFun" deviceset="GND" device=""/>
@@ -27671,47 +27670,48 @@ MMBT4403 - 40V 600mA SOT-23 (TRANS-09245)</description>
 <part name="C14" library="SparkFun-Capacitors" deviceset="0.1UF-25V(+80/-20%)(0603)" device="" value="0.1uF"/>
 <part name="GND24" library="SparkFun" deviceset="GND" device=""/>
 <part name="P+1" library="SparkFun-Aesthetics" deviceset="3.3V" device="" value="3.3V"/>
+<part name="GND2" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
 <plain>
-<text x="12.7" y="144.78" size="5.08" layer="97">Microcontroller</text>
-<text x="182.88" y="149.86" size="5.08" layer="97">USB-Serial</text>
-<text x="200.66" y="218.44" size="1.778" layer="97">Default: Closed/Data rate 10SPS</text>
-<text x="200.66" y="213.36" size="1.778" layer="97">Open jumper to set to 80SPS
+<text x="12.7" y="144.78" size="5.08" layer="97" font="vector">Microcontroller</text>
+<text x="182.88" y="149.86" size="5.08" layer="97" font="vector">USB-Serial</text>
+<text x="200.66" y="218.44" size="1.778" layer="97" font="vector">Default: Closed/Data rate 10SPS</text>
+<text x="200.66" y="213.36" size="1.778" layer="97" font="vector">Open jumper to set to 80SPS
 Noise floor doubles to 90nV</text>
-<text x="33.02" y="228.6" size="1.778" layer="97">E+</text>
-<text x="33.02" y="226.06" size="1.778" layer="97">E-</text>
-<text x="33.02" y="223.52" size="1.778" layer="97">A-</text>
-<text x="33.02" y="220.98" size="1.778" layer="97">A+</text>
-<text x="15.24" y="228.6" size="1.778" layer="97">Red</text>
-<text x="15.24" y="226.06" size="1.778" layer="97">Black</text>
-<text x="15.24" y="223.52" size="1.778" layer="97">White</text>
-<text x="15.24" y="220.98" size="1.778" layer="97">Green or Blue</text>
-<text x="15.24" y="231.14" size="1.778" layer="97">Common Load
+<text x="34.798" y="228.6" size="1.778" layer="97">E+</text>
+<text x="34.798" y="226.06" size="1.778" layer="97">E-</text>
+<text x="34.798" y="223.52" size="1.778" layer="97">A-</text>
+<text x="34.544" y="220.726" size="1.778" layer="97">A+</text>
+<text x="12.7" y="228.6" size="1.778" layer="97" font="vector">Red</text>
+<text x="12.7" y="226.06" size="1.778" layer="97" font="vector">Black</text>
+<text x="12.7" y="223.52" size="1.778" layer="97" font="vector">White</text>
+<text x="12.7" y="220.98" size="1.778" layer="97" font="vector">Green or Blue</text>
+<text x="12.7" y="231.14" size="1.778" layer="97" font="vector">Common Load
 Cell Colors:</text>
-<text x="251.46" y="264.16" size="5.08" layer="97">Temperature Compensation</text>
-<text x="240.792" y="197.358" size="2.54" layer="97">(Optional)
+<text x="251.46" y="264.16" size="5.08" layer="97" font="vector">Temperature Compensation</text>
+<text x="240.792" y="197.358" size="2.54" layer="97" font="vector">(Optional)
 External
 DS18B20</text>
-<text x="15.24" y="254" size="5.08" layer="97">Load Cell Amplifier</text>
-<text x="322.072" y="191.516" size="2.54" layer="97">7-Bit I2C: 0x49</text>
-<text x="27.94" y="218.44" size="1.778" layer="97">Shield</text>
-<text x="142.494" y="102.362" size="1.778" layer="97">Optional External
+<text x="15.24" y="254" size="5.08" layer="97" font="vector">Load Cell Amplifier</text>
+<text x="322.072" y="191.516" size="2.54" layer="97" font="vector">7-Bit I2C: 0x49</text>
+<text x="30.48" y="218.44" size="1.778" layer="97">Shield</text>
+<text x="142.494" y="102.362" size="1.778" layer="97" font="vector">Optional External
 Serial Interface</text>
 <text x="137.16" y="238.76" size="1.778" layer="96">VBG = 1.25V</text>
-<text x="86.36" y="241.3" size="1.778" layer="96">AVDD = VBG(R1+R2)/R1</text>
-<text x="421.64" y="7.62" size="2.54" layer="94">v04</text>
-<text x="353.568" y="11.43" size="2.54" layer="94">N. Seidle</text>
+<text x="86.36" y="241.3" size="1.778" layer="96" font="vector">AVDD = VBG(R1+R2)/R1</text>
+<text x="421.64" y="7.62" size="2.54" layer="94" font="vector">v04</text>
+<text x="353.568" y="11.43" size="2.54" layer="94" font="vector">N. Seidle</text>
 <text x="127" y="140.97" size="1.778" layer="97">Power the board with 4.5-5.5V</text>
 <text x="205.74" y="66.04" size="1.778" layer="97" font="vector">RED</text>
 <text x="205.74" y="63.5" size="1.778" layer="97" font="vector">WHT</text>
 <text x="205.74" y="60.96" size="1.778" layer="97" font="vector">BLK</text>
-<text x="205.74" y="27.94" size="3.81" layer="97">Combine 4 Load sensors to create 1 load cell</text>
+<text x="205.74" y="27.94" size="3.81" layer="97" font="vector">Combine 4 Load sensors to create 1 load cell</text>
 <text x="185.42" y="78.74" size="5.08" layer="97" font="vector">Load Sensor Combiner</text>
-<text x="160.02" y="248.92" size="1.778" layer="97">Default :Left side of Jumper closed to provide 5V to DVDD.
+<text x="160.02" y="248.92" size="1.778" layer="97" font="vector">Default :Left side of Jumper closed to provide 5V to DVDD.
 Customer to close right side and provide 3.3V to J1. </text>
-<text x="331.47" y="7.366" size="2.54" layer="94">Revision by:   Mary West</text>
+<text x="331.47" y="7.366" size="2.54" layer="94" font="vector">Revision by:   Mary West</text>
 <wire x1="0" y1="160.02" x2="180.34" y2="160.02" width="0.1524" layer="97" style="shortdash"/>
 <wire x1="180.34" y1="160.02" x2="236.22" y2="160.02" width="0.1524" layer="97" style="shortdash"/>
 <wire x1="236.22" y1="160.02" x2="431.8" y2="160.02" width="0.1524" layer="97" style="shortdash"/>
@@ -27722,7 +27722,6 @@ Customer to close right side and provide 3.3V to J1. </text>
 <wire x1="236.22" y1="279.4" x2="236.22" y2="160.02" width="0.1524" layer="97" style="shortdash"/>
 </plain>
 <instances>
-<instance part="GND2" gate="1" x="127" y="17.78"/>
 <instance part="GND5" gate="1" x="73.66" y="43.18"/>
 <instance part="GND6" gate="1" x="63.5" y="86.36"/>
 <instance part="GND7" gate="1" x="109.22" y="114.3"/>
@@ -27890,16 +27889,12 @@ Customer to close right side and provide 3.3V to J1. </text>
 <instance part="C14" gate="G$1" x="213.36" y="104.14"/>
 <instance part="GND24" gate="1" x="213.36" y="93.98"/>
 <instance part="P+1" gate="G$1" x="317.5" y="134.62"/>
+<instance part="GND2" gate="1" x="127" y="17.78"/>
 </instances>
 <busses>
 </busses>
 <nets>
 <net name="GND" class="1">
-<segment>
-<wire x1="127" y1="20.32" x2="127" y2="22.86" width="0.1524" layer="91"/>
-<pinref part="GND2" gate="1" pin="GND"/>
-<pinref part="D3" gate="G$1" pin="C"/>
-</segment>
 <segment>
 <pinref part="U4" gate="U$1" pin="GND@5"/>
 <wire x1="76.2" y1="48.26" x2="73.66" y2="48.26" width="0.1524" layer="91"/>
@@ -28081,6 +28076,11 @@ Customer to close right side and provide 3.3V to J1. </text>
 <pinref part="C14" gate="G$1" pin="2"/>
 <pinref part="GND24" gate="1" pin="GND"/>
 <wire x1="213.36" y1="101.6" x2="213.36" y2="96.52" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="D3" gate="G$1" pin="C"/>
+<wire x1="127" y1="22.86" x2="127" y2="20.32" width="0.2032" layer="91"/>
+<pinref part="GND2" gate="1" pin="GND"/>
 </segment>
 </net>
 <net name="RST" class="0">
