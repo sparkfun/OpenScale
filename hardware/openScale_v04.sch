@@ -27701,13 +27701,13 @@ DS18B20</text>
 Serial Interface</text>
 <text x="137.16" y="238.76" size="1.778" layer="96">VBG = 1.25V</text>
 <text x="86.36" y="241.3" size="1.778" layer="96" font="vector">AVDD = VBG(R1+R2)/R1</text>
-<text x="421.64" y="7.62" size="2.54" layer="94" font="vector">v04</text>
+<text x="421.64" y="7.62" size="2.54" layer="94" font="vector">v10</text>
 <text x="353.568" y="11.43" size="2.54" layer="94" font="vector">N. Seidle</text>
 <text x="127" y="140.97" size="1.778" layer="97">Power the board with 4.5-5.5V</text>
 <text x="205.74" y="66.04" size="1.778" layer="97" font="vector">RED</text>
 <text x="205.74" y="63.5" size="1.778" layer="97" font="vector">WHT</text>
 <text x="205.74" y="60.96" size="1.778" layer="97" font="vector">BLK</text>
-<text x="205.74" y="27.94" size="3.81" layer="97" font="vector">Combine 4 Load sensors to create 1 load cell</text>
+<text x="210.82" y="25.4" size="2.54" layer="97" font="vector">Combine 4 Load sensors to create 1 load cell</text>
 <text x="185.42" y="78.74" size="5.08" layer="97" font="vector">Load Sensor Combiner</text>
 <text x="160.02" y="248.92" size="1.778" layer="97" font="vector">Default :Left side of Jumper closed to provide 5V to DVDD.
 Customer to close right side and provide 3.3V to J1. </text>

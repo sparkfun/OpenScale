@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.01" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.005" altunitdist="inch" altunit="inch"/>
+<grid distance="0.05" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.005" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -54,7 +54,7 @@
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="yes"/>
 <layer number="45" name="Holes" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="46" name="Milling" color="3" fill="1" visible="no" active="yes"/>
-<layer number="47" name="Measures" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="47" name="Measures" color="7" fill="1" visible="no" active="yes"/>
 <layer number="48" name="Document" color="7" fill="1" visible="no" active="yes"/>
 <layer number="49" name="Reference" color="7" fill="1" visible="no" active="yes"/>
 <layer number="50" name="dxf" color="7" fill="1" visible="no" active="no"/>
@@ -187,7 +187,7 @@ E+</text>
 <text x="50.419" y="23.114" size="1.778" layer="22" font="vector" ratio="15" rot="MR270">Serial Out</text>
 <text x="50.9905" y="21.971" size="1.016" layer="22" font="vector" ratio="15" rot="MR90">BLK</text>
 <text x="52.0065" y="11.4935" size="1.016" layer="22" font="vector" ratio="15" rot="MR270">GRN</text>
-<text x="21.0185" y="44.831" size="1.27" layer="16" font="vector" ratio="15" rot="MR0">v04</text>
+<text x="12.7635" y="44.45" size="1.27" layer="16" font="vector" ratio="15" rot="MR0">v10</text>
 <text x="4.372" y="22.787" size="1.016" layer="21" font="vector" ratio="15" rot="SR270" align="center">BLK
 E-</text>
 <text x="4.372" y="19.231" size="1.016" layer="21" font="vector" ratio="15" rot="SR270" align="center">WHT
@@ -247,7 +247,7 @@ Gain
 <text x="22.6695" y="6.604" size="1.016" layer="21" font="vector" ratio="15">+</text>
 <text x="24.9555" y="6.604" size="1.016" layer="21" font="vector" ratio="15">C</text>
 <text x="16.51" y="-11.43" size="1.778" layer="51" font="vector">Revision By: Mary West</text>
-<text x="49.53" y="22.606" size="1.778" layer="21" font="vector" ratio="15" rot="R270">Serial Out</text>
+<text x="50.292" y="21.844" size="1.27" layer="21" font="vector" ratio="15" rot="R270">Serial Out</text>
 <text x="68.58" y="21.9075" size="1.778" layer="47" font="vector">All units in Inches</text>
 <text x="41.91" y="6.985" size="0.8128" layer="21" font="vector" ratio="15" rot="R270">3.3V</text>
 <text x="46.0375" y="6.35" size="0.8128" layer="21" font="vector" ratio="15" rot="R270">5V</text>
@@ -3197,16 +3197,6 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <wire x1="12.7" y1="29.8704" x2="12.7508" y2="29.9212" width="0.2032" layer="1"/>
 <wire x1="1.27" y1="31.75" x2="8.2146" y2="31.75" width="0.2032" layer="1"/>
 <wire x1="8.2146" y1="31.75" x2="10.16" y2="29.8046" width="0.2032" layer="1"/>
-<polygon width="0.2032" layer="1" isolate="0.3048">
-<vertex x="2.794" y="46.99"/>
-<vertex x="53.086" y="46.99" curve="-90"/>
-<vertex x="55.88" y="44.196"/>
-<vertex x="55.88" y="3.302" curve="-90"/>
-<vertex x="52.578" y="0"/>
-<vertex x="3.302" y="0" curve="-90"/>
-<vertex x="0" y="3.302"/>
-<vertex x="0" y="44.196" curve="-90"/>
-</polygon>
 <wire x1="23.8125" y1="12.3825" x2="23.8125" y2="13.97" width="0.254" layer="1"/>
 <wire x1="23.8125" y1="13.97" x2="23.8125" y2="17.145" width="0.254" layer="1"/>
 <contactref element="C14" pad="2"/>
@@ -3232,6 +3222,13 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <via x="32.512" y="30.226" extent="1-16" drill="0.381"/>
 <via x="33.02" y="22.098" extent="1-16" drill="0.381"/>
 <via x="44.196" y="19.812" extent="1-16" drill="0.381"/>
+<via x="38.989" y="10.541" extent="1-16" drill="0.381"/>
+<polygon width="0.2032" layer="1" isolate="0.3048">
+<vertex x="0" y="46.99"/>
+<vertex x="55.88" y="46.99"/>
+<vertex x="55.88" y="0"/>
+<vertex x="0" y="0"/>
+</polygon>
 </signal>
 <signal name="RST">
 <contactref element="R2" pad="1"/>
@@ -3489,10 +3486,9 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <wire x1="35.8775" y1="26.9875" x2="36.83" y2="26.035" width="0.2032" layer="1"/>
 <wire x1="39.6875" y1="11.3275" x2="40.64" y2="11.3275" width="0.2032" layer="1"/>
 <wire x1="40.64" y1="11.3275" x2="40.7425" y2="11.43" width="0.2032" layer="1"/>
-<wire x1="40.7425" y1="11.43" x2="40.7425" y2="10.5325" width="0.2032" layer="1"/>
-<wire x1="40.7425" y1="10.5325" x2="40.9325" y2="10.3425" width="0.2032" layer="1"/>
 <wire x1="40.9325" y1="9.8425" x2="40.3225" y2="9.8425" width="0.2032" layer="1"/>
-<wire x1="40.3225" y1="9.8425" x2="39.6875" y2="10.4775" width="0.2032" layer="1"/>
+<wire x1="40.3225" y1="9.8425" x2="40.0685" y2="10.0965" width="0.2032" layer="1"/>
+<wire x1="40.0685" y1="10.0965" x2="39.6875" y2="10.4775" width="0.2032" layer="1"/>
 <wire x1="39.6875" y1="10.4775" x2="39.6875" y2="11.3275" width="0.2032" layer="1"/>
 <wire x1="40.64" y1="11.5325" x2="40.7425" y2="11.43" width="0.2032" layer="1"/>
 <wire x1="37.7825" y1="11.3275" x2="39.6875" y2="11.3275" width="0.2032" layer="1"/>
@@ -3522,6 +3518,8 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 <wire x1="35.7865" y1="25.3725" x2="33.909" y2="23.495" width="0.2032" layer="1"/>
 <wire x1="33.909" y1="23.495" x2="33.1225" y2="23.495" width="0.2032" layer="1"/>
 <wire x1="33.1225" y1="23.495" x2="33.02" y2="23.5975" width="0.2032" layer="1"/>
+<wire x1="40.9325" y1="10.3425" x2="40.3145" y2="10.3425" width="0.2032" layer="1"/>
+<wire x1="40.3145" y1="10.3425" x2="40.0685" y2="10.0965" width="0.2032" layer="1"/>
 </signal>
 <signal name="RXLED">
 <contactref element="D1" pad="C"/>
