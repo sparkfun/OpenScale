@@ -55,7 +55,7 @@
  */
 
 #include <HX711.h> //Library created by bogde
-#include "openscale.h" //Contains EPPROM locations for settings
+//#include "openscale.h" //Contains EPPROM locations for settings
 #include <Wire.h> //Needed to talk to on board TMP102 temp sensor
 #include <EEPROM.h> //Needed to record user settings
 #include <OneWire.h> //Needed to read DS18B20 temp sensors

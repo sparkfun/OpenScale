@@ -28,6 +28,7 @@
 #define LOCATION_STATUS_ENABLE                  (LOCATION_MASS_UNITS + 20)
 #define LOCATION_SERIAL_TRIGGER_ENABLE          (LOCATION_MASS_UNITS + 21)
 #define LOCATION_RAW_READING_ENABLE             (LOCATION_MASS_UNITS + 22)
+#define LOCATION_TRIGGER_CHARACTER              (LOCATION_MASS_UNITS + 23)
 
 //Arduino doesn't properly handle bauds lower than 500bps
 #define BAUD_MIN  1200
