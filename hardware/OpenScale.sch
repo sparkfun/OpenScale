@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.1.0">
+<eagle version="7.2.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -27016,9 +27016,9 @@ MMBT4403 - 40V 600mA SOT-23 (TRANS-09245)</description>
 <part name="U$11" library="SparkFun" deviceset="5V" device=""/>
 <part name="GND20" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="LOGO3" library="SparkFun-Aesthetics" deviceset="SFE_LOGO_FLAME" device=".1_STOP" value="SFE_LOGO_FLAME.1_STOP"/>
-<part name="JP4" library="SparkFun-Connectors" deviceset="M03" device="SCREW_LOCK" value="Screw"/>
+<part name="JP4" library="SparkFun-Connectors" deviceset="M03" device="SCREW_LOCK" value="SCREWTERMINAL-3"/>
 <part name="JP3" library="SparkFun-Connectors" deviceset="M05" device="NO_SILK"/>
-<part name="JP11" library="SparkFun-Connectors" deviceset="M05" device="SCREW"/>
+<part name="JP11" library="SparkFun-Connectors" deviceset="M05" device="SCREW" value="SCREWTERMINAL-5"/>
 <part name="L1" library="SparkFun-Passives" deviceset="INDUCTOR" device="0805" value="3.3uH"/>
 </parts>
 <sheets>
