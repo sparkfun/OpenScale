@@ -47,7 +47,7 @@
  GND -> GND
  */
 
-#include <HX711.h> //Original Repository Created by Bodge https://github.com/bogde/HX711
+#include "HX711.h" //Original Repository Created by Bodge https://github.com/bogde/HX711
 #include "openscale.h" //Contains EPPROM locations for settings
 #include <Wire.h> //Needed to talk to on board TMP102 temp sensor
 #include <EEPROM.h> //Needed to record user settings
@@ -121,9 +121,9 @@ void setup()
   checkEmergencyReset(); //Look to see if the RX pin is being pulled low
 
   //For the beehive in a pinch, zero to a number we calculated
-  setting_tare_point = (long)8647409;
-  scale.set_scale(setting_calibration_factor); //Calibrate scale from EEPROM value
-  scale.set_offset(setting_tare_point); //Zero out the scale using a previously known zero point
+  //setting_tare_point = (long)8647409;
+  //scale.set_scale(setting_calibration_factor); //Calibrate scale from EEPROM value
+  //scale.set_offset(setting_tare_point); //Zero out the scale using a previously known zero point
 
   //Calculate the minimum time between reports
   int minTime = calcMinimumReadTime();
