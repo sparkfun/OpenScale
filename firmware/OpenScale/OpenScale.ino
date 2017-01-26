@@ -171,10 +171,7 @@ void setup()
 
   checkEmergencyReset(); //Look to see if the RX pin is being pulled low
 
-  //For the beehive in a pinch, zero to a number we calculated
-  setting_tare_point = (long)8647409;
-  scale.set_scale(setting_calibration_factor); //Calibrate scale from EEPROM value
-  scale.set_offset(setting_tare_point); //Zero out the scale using a previously known zero point
+  //Removed beehive calibration. 
 
   //Calculate the minimum time between reports
   int minTime = calcMinimumReadTime();
