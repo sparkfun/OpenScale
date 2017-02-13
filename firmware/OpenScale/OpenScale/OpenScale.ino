@@ -232,23 +232,23 @@ void loop()
     //Any less than this and micro doesn't sleep
 
     powerDownScale();
-  char incoming = 0;
+	char incoming = 0;
 
     //Wait for a trigger character or x from user
     while (incoming != setting_trigger_character && incoming != 'x')
     {
       while (Serial.available() == false){
-      
-     delay(1);
+		  
+	   delay(1);
       //We  go into deep sleep here. This would save 10-20mA.
-    power_twi_disable();
-    power_timer0_disable(); //Shut down peripherals we don't need
+		power_twi_disable();
+		power_timer0_disable(); //Shut down peripherals we don't need
     
-    sleep_mode(); //Stop everything and go to sleep. Wake up if serial character received
+		sleep_mode(); //Stop everything and go to sleep. Wake up if serial character received
     
-    power_timer0_enable();
-    power_twi_enable();
-    }
+		power_timer0_enable();
+		power_twi_enable();
+		}
 
       incoming = Serial.read();
       if (incoming == escape_character) setupMode = true;
@@ -348,8 +348,8 @@ void system_setup(void)
     if (setting_raw_reading_enable == true) Serial.print(F("n"));
     else Serial.print(F("ff"));
     Serial.println(F("]"));
-  
-  Serial.print(F("c) Trigger character: ["));
+	
+	Serial.print(F("c) Trigger character: ["));
     Serial.print(setting_trigger_character);
     Serial.println(F("]"));
 
@@ -524,7 +524,7 @@ void system_setup(void)
       }
       record_system_settings();
     }
-  else if (command == 'c')
+	else if (command == 'c')
     {
       Serial.print(F("\n\rEnter new trigger character: "));
 
