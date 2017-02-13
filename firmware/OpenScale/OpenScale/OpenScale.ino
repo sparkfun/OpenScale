@@ -120,7 +120,8 @@ void setup()
 
   checkEmergencyReset(); //Look to see if the RX pin is being pulled low
 
-  //Removed code from Beehive use.
+  scale.set_scale(setting_calibration_factor);
+  scale.set_offset(setting_tare_point);
 
   //Calculate the minimum time between reports
   int minTime = calcMinimumReadTime();
