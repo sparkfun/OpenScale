@@ -1,51 +1,51 @@
 /*
- OpenScale: A serial interface for reading and configuring load cells.
- By: Nathan Seidle
- SparkFun Electronics
- Date: November 24th, 2014
- License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
+  OpenScale: A serial interface for reading and configuring load cells.
+  By: Nathan Seidle
+  SparkFun Electronics
+  Date: November 24th, 2014
+  License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
 
- This example code uses bogde's excellent library: https://github.com/bogde/HX711
- SparkFun spends a lot of time and energy building open source hardware and writing public domain code.
- Please consider supporting SparkFun by buying a product or kit.
+  This example code uses bogde's excellent library: https://github.com/bogde/HX711
+  SparkFun spends a lot of time and energy building open source hardware and writing public domain code.
+  Please consider supporting SparkFun by buying a product or kit.
 
- OpenScale is a simple board that allows a user to read and configure all types of load cells.
- It relies on the HX711 load cell amplifier.
+  OpenScale is a simple board that allows a user to read and configure all types of load cells.
+  It relies on the HX711 load cell amplifier.
 
- How to use:
- 1) Wire your load cell to the board using the 4-pin connection (E+/-, A+/-) or the RJ45 connection.
- 2) Attach board to USB and open terminal at 9600bps
- 3) Press x to bring up settings menu
- 4) Select units LBS/KG
- 5) Tare the scale with no weight on the scale
- 6) Calibrate the scale: Remove any weight, start calibration routine, place weight on scale, adjust calibration
- factor until scale reads out the calibration weight.
- 7) Press x and test your scale
+  How to use:
+  1) Wire your load cell to the board using the 4-pin connection (E+/-, A+/-) or the RJ45 connection.
+  2) Attach board to USB and open terminal at 9600bps
+  3) Press x to bring up settings menu
+  4) Select units LBS/KG
+  5) Tare the scale with no weight on the scale
+  6) Calibrate the scale: Remove any weight, start calibration routine, place weight on scale, adjust calibration
+  factor until scale reads out the calibration weight.
+  7) Press x and test your scale
 
- OpenScale ships with an Arduino/Optiboot 115200bps serial bootloader running at 16MHz so you can load new firmware
- with a simple serial connection. Select 'Arduino Uno' under the boards menu to reprogram the board.
+  OpenScale ships with an Arduino/Optiboot 115200bps serial bootloader running at 16MHz so you can load new firmware
+  with a simple serial connection. Select 'Arduino Uno' under the boards menu to reprogram the board.
 
- OpenScale runs at 9600bps by default. This is configurable to 1200, 2400, 4800, 9600, 19200, 38400, 57600, and 115200bps.
+  OpenScale runs at 9600bps by default. This is configurable to 1200, 2400, 4800, 9600, 19200, 38400, 57600, and 115200bps.
 
- After power up OpenScale will try reading the load cell and output a weight value.
+  After power up OpenScale will try reading the load cell and output a weight value.
 
- If you get OpenScale stuck into an unknown baudrate, there is a safety mechanism built-in. Tie the RX pin
- to ground and power up OpenScale. You should see the status LED blink at 1Hz for 2 seconds.
- Now power down OpenScale and remove the RX/GND jumper. OpenScale is now reset to 9600bps.
+  If you get OpenScale stuck into an unknown baudrate, there is a safety mechanism built-in. Tie the RX pin
+  to ground and power up OpenScale. You should see the status LED blink at 1Hz for 2 seconds.
+  Now power down OpenScale and remove the RX/GND jumper. OpenScale is now reset to 9600bps.
 
- To change the baud rate type 'x' to bring up configuration menu. Select the baud rate sub menu and enter
- the baud rate of your choice. You will then see a message for example 'Going to 9600bps...'.
- You will need to power down OpenScale, change your system UART settings to match the new OpenScale
- baud rate and then power OpenScale back up.
+  To change the baud rate type 'x' to bring up configuration menu. Select the baud rate sub menu and enter
+  the baud rate of your choice. You will then see a message for example 'Going to 9600bps...'.
+  You will need to power down OpenScale, change your system UART settings to match the new OpenScale
+  baud rate and then power OpenScale back up.
 
- STAT LED / D13 - toggles after each report
+  STAT LED / D13 - toggles after each report
 
- If you're using this firmware with the HX711 breakout and an Uno here are the pins to hook up:
- Arduino pin 2 -> HX711 CLK
- 3 -> DAT
- 5V -> VCC
- GND -> GND
- */
+  If you're using this firmware with the HX711 breakout and an Uno here are the pins to hook up:
+  Arduino pin 2 -> HX711 CLK
+  3 -> DAT
+  5V -> VCC
+  GND -> GND
+*/
 
 #include "HX711.h" //Original Repository Created by Bodge https://github.com/bogde/HX711
 #include "openscale.h" //Contains EPPROM locations for settings
@@ -228,28 +228,28 @@ void loop()
   if (setting_serial_trigger_enable == true)
   {
     //Power everything down and go to sleep until a char is received
-    
+
     delay(100); //Give the micro time to clear out the transmit buffer
     //Any less than this and micro doesn't sleep
 
     powerDownScale();
-	char incoming = 0;
+    char incoming = 0;
 
     //Wait for a trigger character or x from user
     while (incoming != setting_trigger_character && incoming != 'x')
     {
-      while (Serial.available() == false){
-		  
-	   delay(1);
-      //We  go into deep sleep here. This would save 10-20mA.
-		power_twi_disable();
-		power_timer0_disable(); //Shut down peripherals we don't need
-    
-		sleep_mode(); //Stop everything and go to sleep. Wake up if serial character received
-    
-		power_timer0_enable();
-		power_twi_enable();
-		}
+      while (Serial.available() == false) {
+
+        delay(1);
+        //We  go into deep sleep here. This would save 10-20mA.
+        power_twi_disable();
+        power_timer0_disable(); //Shut down peripherals we don't need
+
+        sleep_mode(); //Stop everything and go to sleep. Wake up if serial character received
+
+        power_timer0_enable();
+        power_twi_enable();
+      }
 
       incoming = Serial.read();
       if (incoming == escape_character) setupMode = true;
@@ -268,7 +268,7 @@ void loop()
     setupMode = false;
 
     if (setting_status_enable == false) digitalWrite(statusLED, LOW); //Turn off LED
-}
+  }
 }
 
 
@@ -349,8 +349,8 @@ void system_setup(void)
     if (setting_raw_reading_enable == true) Serial.print(F("n"));
     else Serial.print(F("ff"));
     Serial.println(F("]"));
-	
-	Serial.print(F("c) Trigger character: ["));
+
+    Serial.print(F("c) Trigger character: ["));
     Serial.print(setting_trigger_character);
     Serial.println(F("]"));
 
@@ -525,7 +525,7 @@ void system_setup(void)
       }
       record_system_settings();
     }
-	else if (command == 'c')
+    else if (command == 'c')
     {
       Serial.print(F("\n\rEnter new trigger character: "));
 
@@ -1084,7 +1084,7 @@ void set_default_settings(void)
 
   //Reset raw reading
   setting_raw_reading_enable = false;
-  
+
   //Reset trigger character
   setting_trigger_character = '!';
 
@@ -1120,7 +1120,7 @@ void record_system_settings(void)
   EEPROM.write(LOCATION_SERIAL_TRIGGER_ENABLE, setting_serial_trigger_enable);
 
   EEPROM.write(LOCATION_RAW_READING_ENABLE, setting_raw_reading_enable);
-  
+
   EEPROM.write(LOCATION_TRIGGER_CHARACTER, setting_trigger_character);
 }
 
@@ -1231,7 +1231,7 @@ void readSystemSettings(void)
     setting_raw_reading_enable = false; //Default to false
     EEPROM.write(LOCATION_RAW_READING_ENABLE, setting_raw_reading_enable);
   }
-  
+
   //Look up the character to trigger a reading
   setting_trigger_character = EEPROM.read(LOCATION_TRIGGER_CHARACTER);
   if (setting_trigger_character == 255)
