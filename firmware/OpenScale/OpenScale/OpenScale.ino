@@ -56,6 +56,7 @@
   - on keypad doesn't work
   powering the scale down seems to be causing the raw readings to be off
   replace EEPROM reads/writes with gets/puts
+  Echo calibration user entry
   
 */
 

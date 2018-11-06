@@ -91,7 +91,7 @@ void system_setup(void)
     else Serial.print(F("ff"));
     Serial.println(F("]"));
 
-    Serial.print(F("c) Trigger character: [ "));
+    Serial.print(F("c) Trigger character: ["));
     Serial.print(setting_trigger_character);
     Serial.print(F(" / '"));
     Serial.write(setting_trigger_character);
@@ -115,21 +115,8 @@ void system_setup(void)
 
       scale.tare(); //Reset the scale to 0
 
-
       setting_tare_point = scale.read_average(10); //Get 10 readings from the HX711 and average them
-      Serial.print(F("\n\rTare point 1: "));
-      Serial.println(setting_tare_point);
-
-      //Try a different method
-      setting_tare_point = 0;
-      for (int x = 0 ; x < 10 ; x++)
-      {
-        setting_tare_point += scale.read(); //Get a reading
-        delay(100);
-      }
-      setting_tare_point /= 10;
-
-      Serial.print(F("\n\rTare point 2: "));
+      Serial.print(F("\n\rTare point: "));
       Serial.println(setting_tare_point);
 
       record_system_settings();
