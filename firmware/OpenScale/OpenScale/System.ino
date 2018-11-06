@@ -220,7 +220,7 @@ void readSystemSettings(void)
   setting_remote_temp_enable = EEPROM.read(LOCATION_REMOTE_TEMP_ENABLE);
   if (setting_remote_temp_enable > 1)
   {
-    setting_remote_temp_enable = true; //Default to true
+    setting_remote_temp_enable = false; //Default to false
     EEPROM.write(LOCATION_REMOTE_TEMP_ENABLE, setting_remote_temp_enable);
   }
 
