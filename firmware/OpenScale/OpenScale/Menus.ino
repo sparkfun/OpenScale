@@ -476,9 +476,7 @@ void rate_setup(void)
   //Calculate the minimum time between reports
   int minTime = calcMinimumReadTime();
 
-  Serial.println(F("Press + or a to increase time between reports"));
-  Serial.println(F("Press - or z to decrease time between reports"));
-  Serial.println(F("Press x to exit"));
+  Serial.println(F("\n\n\rSet time between reports"));
 
   Serial.print(F("Minimum: "));
   Serial.print(minTime);
@@ -486,67 +484,31 @@ void rate_setup(void)
 
   if (setting_report_rate < minTime) setting_report_rate = minTime;
 
-  Serial.print(F("Time: "));
+  Serial.print(F("Current Time: "));
   Serial.print(setting_report_rate);
   Serial.println(F("ms"));
 
-  long lastChange = millis();
-  int changeRate = 1;
-  int holdDownCounter = 0;
+  //Read user input
+  Serial.print(F("Enter new time (ms): "));
+  char newSetting[8]; //Max at 1000000 = 1000 seconds
+  read_line(newSetting, sizeof(newSetting));
 
-  while (1)
+  int newReportRate = strtolong(newSetting); //Convert this string to an int
+
+  //Error check
+  if(newReportRate > minTime)
   {
-    if (Serial.available())
-    {
-      char temp = Serial.read();
+    setting_report_rate = newReportRate; //Go to this new time
 
-      //Check to see if user is holding down the button
-      long delta = millis() - lastChange;
-      lastChange = millis();
-
-      if (delta > 100) //Slow, just change one at a time and reset holdDown counter
-      {
-        changeRate = 1;
-        holdDownCounter = 0;
-      }
-      else //You're holding the button down, change 10, 25, or500300 medium 10 and increment counter
-      {
-        changeRate = 10;
-        holdDownCounter++;
-        if (holdDownCounter > 500)
-        {
-          holdDownCounter = 500; //Don't let this get too big
-          changeRate = 500; //Change faster
-        }
-        else if (holdDownCounter > 25)
-        {
-          changeRate = 25; //Change faster
-        }
-      }
-
-      if (temp == '+' || temp == 'a')
-        setting_report_rate += changeRate;
-      else if (temp == '-' || temp == 'z')
-      {
-        if (changeRate > setting_report_rate) //Catch a case where we could go negative
-          setting_report_rate = 0;
-        else
-          setting_report_rate -= changeRate;
-      }
-      else if (temp == 'x')
-        break;
-
-      if (setting_report_rate < minTime) setting_report_rate = minTime;
-      if (setting_report_rate > 50000) setting_report_rate = 50000; //Max of 50 seconds
-
-      Serial.print(F("Time: "));
-      Serial.print(setting_report_rate);
-      Serial.println(F("ms"));
-    }
+    //Record this new value to EEPROM
+    record_system_settings();
+  
+    Serial.print(F("Time between reports now: "));
+    Serial.print(setting_report_rate);
+    Serial.println(F("ms"));
   }
-
-  //Record this new value to EEPROM
-  record_system_settings();
+  else
+    Serial.println(F("Time out of bounds"));
 }
 
 //Determine how much time we need between measurements
