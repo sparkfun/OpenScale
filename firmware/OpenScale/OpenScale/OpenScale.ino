@@ -18,8 +18,8 @@
   3) Press x to bring up settings menu
   4) Select units LBS/KG
   5) Tare the scale with no weight on the scale
-  6) Calibrate the scale: Remove any weight, start calibration routine, place weight on scale, adjust calibration
-  factor until scale reads out the calibration weight.
+  6) Calibrate the scale: Remove any weight, start calibration routine, place weight on scale, type
+  in the weight placed on the scale.
   7) Press x and test your scale
 
   OpenScale ships with an Arduino/Optiboot 115200bps serial bootloader running at 16MHz so you can load new firmware
@@ -46,7 +46,6 @@
   5V -> VCC
   GND -> GND
 
-
   Firmware versions:
   v1.0 - Original release
   v1.1 - Added trigger character
@@ -56,11 +55,6 @@
   to text enter. Now you can calibrate your system by typing in '0.5762' and OpenScale
   will figure out all the calibration factors.
   * Fixed a bug with the EEPROM defaulting to the wrong values
-
-  TODO:
-  - on keypad doesn't work
-  powering the scale down seems to be causing the raw readings to be off
-  replace EEPROM reads/writes with gets/puts
 */
 
 #include "HX711.h" //Original Repository Created by Bodge https://github.com/bogde/HX711
@@ -154,15 +148,11 @@ void setup()
 
   Serial.println(F("Readings:"));
 
-//Something odd with power cycling
-  powerUpScale();
-  delay(100); //Something odd with power cycling
+  powerUpScale(); //Be sure the scale is powered up
 }
 
 void loop()
 {
-  //Power cycle takes around 400ms so only do so if our report rate is greater than 500ms
-//Something odd with power cycling  if (setting_report_rate > minimum_powercycle_time) powerUpScale();
 
   long startTime = millis();
 
@@ -218,9 +208,6 @@ void loop()
   Serial.println();
   Serial.flush();
 
-  //This takes time so put it after we have printed the report
-//Something odd with power cycling  if (setting_report_rate > minimum_powercycle_time) powerDownScale();
-
   //Hang out until the end of this report period
   while (1)
   {
@@ -247,10 +234,9 @@ void loop()
   {
     //Power everything down and go to sleep until a char is received
 
-//Something odd with power cycling    delay(100); //Give the micro time to clear out the transmit buffer
+    delay(100); //Give the micro time to clear out the transmit buffer
     //Any less than this and micro doesn't sleep
 
-//Something odd with power cycling    powerDownScale();
     char incoming = 0;
 
     //Wait for a trigger character or x from user
@@ -259,7 +245,7 @@ void loop()
       while (Serial.available() == false) {
 
         delay(1);
-        //We  go into deep sleep here. This would save 10-20mA.
+        //We go into deep sleep here. This will save 10-20mA.
         power_twi_disable();
         power_timer0_disable(); //Shut down peripherals we don't need
 
@@ -272,17 +258,12 @@ void loop()
       incoming = Serial.read();
       if (incoming == escape_character) setupMode = true;
     }
-
-//Something odd with power cycling    powerUpScale();
   }
 
   //If the user has pressed x go into system setup
   if (setupMode == true)
   {
-    //Power cycle takes 400ms so only do so if our report rate is less than 400ms
-//Something odd with power cycling        if (setting_report_rate > minimum_powercycle_time) powerUpScale();
     system_setup();
-//Something odd with power cycling        if (setting_report_rate > minimum_powercycle_time) powerDownScale();
     setupMode = false;
 
     if (setting_status_enable == false) digitalWrite(statusLED, LOW); //Turn off LED
