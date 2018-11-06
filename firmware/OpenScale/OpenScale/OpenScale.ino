@@ -45,6 +45,21 @@
   3 -> DAT
   5V -> VCC
   GND -> GND
+
+
+  Firmware versions:
+  v1.0 - Original release
+  v1.1 - Added trigger character
+  v1.2 -
+
+  TODO:
+  Weight doesn't work
+  - on keypad doesn't work
+  display trigger character
+  Should not default to triggering on character (t)
+  enter numbers from keyboard rather than +/-
+  menu doesn't close on first try?
+  remote temp off by default
 */
 
 #include "HX711.h" //Original Repository Created by Bodge https://github.com/bogde/HX711
@@ -56,7 +71,7 @@
 #include <avr/sleep.h> //Needed for sleep_mode
 #include <avr/power.h> //Needed for powering down perihperals such as the ADC/TWI and Timers
 
-#define FIRMWARE_VERSION "1.0"
+#define FIRMWARE_VERSION "1.2"
 
 const byte statusLED = 13;  //Flashes with each reading
 
@@ -141,6 +156,14 @@ void setup()
 
 void loop()
 {
+  Serial.print("cal: ");
+  Serial.print(setting_calibration_factor);
+  Serial.print(" ");
+
+  Serial.print("avg: ");
+  Serial.print(setting_average_amount);
+  Serial.print(" ");
+
   //Power cycle takes around 400ms so only do so if our report rate is greater than 500ms
   if (setting_report_rate > minimum_powercycle_time) powerUpScale();
 
@@ -264,7 +287,7 @@ void loop()
     //Power cycle takes 400ms so only do so if our report rate is less than 400ms
     if (setting_report_rate > minimum_powercycle_time) powerUpScale();
     system_setup();
-    if (setting_report_rate > minimum_powercycle_time) powerDownScale;
+    if (setting_report_rate > minimum_powercycle_time) powerDownScale();
     setupMode = false;
 
     if (setting_status_enable == false) digitalWrite(statusLED, LOW); //Turn off LED
