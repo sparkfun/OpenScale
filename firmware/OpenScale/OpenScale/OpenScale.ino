@@ -53,13 +53,7 @@
   v1.2 -
 
   TODO:
-  Weight doesn't work
   - on keypad doesn't work
-  display trigger character
-  Should not default to triggering on character (t)
-  enter numbers from keyboard rather than +/-
-  menu doesn't close on first try?
-  remote temp off by default
   powering the scale down seems to be causing the raw readings to be off
   replace EEPROM reads/writes with gets/puts
   
@@ -86,11 +80,11 @@ long setting_tare_point; //Zero value that is found when scale is tared
 boolean setting_timestamp_enable; //Prints the number of miliseconds since boot next to weight reading
 byte setting_decimal_places; //How many decimals to display
 byte setting_average_amount; //How many readings to take before reporting reading
-boolean setting_local_temp_enable; //Prints the local temperature in C
-boolean setting_remote_temp_enable; //Prints the remote temperature in C
-boolean setting_status_enable; //Turns on/off the blinking status LED
-boolean setting_serial_trigger_enable; //Takes reading when serial character is received
-boolean setting_raw_reading_enable; //Prints the raw, 24bit, long from the HX711, ex: 8355808
+byte setting_local_temp_enable; //Prints the local temperature in C
+byte setting_remote_temp_enable; //Prints the remote temperature in C
+byte setting_status_enable; //Turns on/off the blinking status LED
+byte setting_serial_trigger_enable; //Takes reading when serial character is received
+byte setting_raw_reading_enable; //Prints the raw, 24bit, long from the HX711, ex: 8355808
 byte setting_trigger_character; //The character that will cause OpenScale to report a reading
 boolean setupMode = false; //This is set to true if user presses x
 
@@ -127,9 +121,7 @@ void setup()
 
   //During testing reset everything
   //for(int x = 0 ; x < 30 ; x++)
-  //{
   //  EEPROM.write(x, 0xFF);
-  //}
 
   Wire.begin();
 

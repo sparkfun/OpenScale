@@ -81,19 +81,21 @@ void system_setup(void)
     else Serial.print(F("Off"));
     Serial.println(F("]"));
 
-    Serial.print(F("t) Serial trigger [O"));
-    if (setting_serial_trigger_enable == true) Serial.print(F("n"));
-    else Serial.print(F("ff"));
-    Serial.println(F("]"));
-
     Serial.print(F("q) Raw reading [O"));
     if (setting_raw_reading_enable == true) Serial.print(F("n"));
     else Serial.print(F("ff"));
     Serial.println(F("]"));
 
-    Serial.print(F("c) Trigger character: ["));
-    Serial.print(setting_trigger_character);
+    Serial.print(F("t) Serial trigger [O"));
+    if (setting_serial_trigger_enable == true) Serial.print(F("n"));
+    else Serial.print(F("ff"));
     Serial.println(F("]"));
+
+    Serial.print(F("c) Trigger character: [ "));
+    Serial.print(setting_trigger_character);
+    Serial.print(F(" / '"));
+    Serial.write(setting_trigger_character);
+    Serial.println(F("']"));
 
 
     Serial.println(F("x) Exit"));
