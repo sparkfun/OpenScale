@@ -328,7 +328,7 @@ byte read_line(char* buffer, byte buffer_length)
 }
 
 //A rudimentary way to convert a string to a long 32 bit integer
-//Used by the read command, in command shell and baud from the system menu
+//Used by the baud setting from the system menu
 uint32_t strtolong(const char* str)
 {
   uint32_t l = 0;

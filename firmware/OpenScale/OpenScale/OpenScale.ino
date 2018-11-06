@@ -296,27 +296,3 @@ void loop()
     if (setting_status_enable == false) digitalWrite(statusLED, LOW); //Turn off LED
   }
 }
-
-
-
-//We use this at startup and for the configuration menu
-//Saves us a few dozen bytes
-void displaySystemHeader(void)
-{
-  Serial.print(F("\r\nSerial Load Cell Converter version "));
-  Serial.println(F(FIRMWARE_VERSION));
-  Serial.println(F("By SparkFun Electronics"));
-
-  //Look to see if we have an external or remote temp sensor attached
-  if (remoteSensor.search(remoteSensorAddress) == 0)
-  {
-    remoteSensorAttached = false;
-    Serial.println(F("No remote sensor found"));
-  }
-  else
-  {
-    remoteSensorAttached = true;
-    Serial.println(F("Remote temperature sensor detected"));
-  }
-
-}
