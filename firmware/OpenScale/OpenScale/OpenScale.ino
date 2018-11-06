@@ -50,7 +50,12 @@
   Firmware versions:
   v1.0 - Original release
   v1.1 - Added trigger character
-  v1.2 -
+  v1.2 - 
+  * Cleaned up white space and split to tabs for easier function finding
+  * Changed the input method of many menu settings from the tedious +/- method
+  to text enter. Now you can calibrate your system by typing in '0.5762' and OpenScale
+  will figure out all the calibration factors.
+  * Fixed a bug with the EEPROM defaulting to the wrong values
 
   TODO:
   - on keypad doesn't work

@@ -1,5 +1,5 @@
 /*
- Lots of serial menus and visual stuff so user can configure the OpenScale
+  Lots of serial menus and visual stuff so user can configure the OpenScale
 */
 
 //We use this at startup and for the configuration menu
@@ -287,7 +287,7 @@ void calibrate_scale(void)
   Serial.println(F("Scale calibration"));
   Serial.println(F("Place known weight on scale. Press a key when weight is in place and stable."));
 
-  while(Serial.available() == false) ; //Wait for user to press key
+  while (Serial.available() == false) ; //Wait for user to press key
 
   Serial.print(F("Tare: "));
   Serial.println(setting_tare_point);
@@ -306,7 +306,7 @@ void calibrate_scale(void)
   Serial.print(setting_calibration_factor);
   Serial.println();
 
-  while(Serial.available()) Serial.read(); //Clear anything in RX buffer
+  while (Serial.available()) Serial.read(); //Clear anything in RX buffer
 
   Serial.print(F("Please enter the weight currently sitting on the scale: "));
 
@@ -317,7 +317,7 @@ void calibrate_scale(void)
   //TODO create function here to echo user's typing and allow for backspaces
   Serial.println();
 
-  while(Serial.available()) Serial.read(); //Clear anything in RX buffer
+  while (Serial.available()) Serial.read(); //Clear anything in RX buffer
 
   Serial.print(F("User entered: "));
   Serial.println(weightOnScale, 4);
@@ -355,80 +355,57 @@ void calibrate_scale(void)
 //Configure how many readings to average together
 void average_reading_setup(void)
 {
-  Serial.println(F("Number of readings to average together"));
-  Serial.println(F("Press + or a to increase"));
-  Serial.println(F("Press - or z to decrease"));
-  Serial.println(F("Press x to exit"));
+  //Get user input
+  Serial.print(F("\n\n\rEnter the number of readings to average together (1 to 64): "));
+  char newSetting[8]; //Max 7 characters
+  read_line(newSetting, sizeof(newSetting));
 
-  Serial.print(F("Number of readings: "));
-  Serial.println(setting_average_amount);
+  int newAverageAmount = strtolong(newSetting); //Convert this string to an int
 
-  while (1)
+  //Error check
+  if (newAverageAmount >= 1 && newAverageAmount <= 64)
   {
-    if (Serial.available())
-    {
-      char temp = Serial.read();
+    setting_average_amount = newAverageAmount;
+    
+    //Record this new value to EEPROM
+    record_system_settings();
 
-      if (temp == '+' || temp == 'a')
-      {
-        if (setting_average_amount < 64) setting_average_amount++;
-      }
-      else if (temp == '-' || temp == 'z')
-      {
-        if (setting_average_amount > 1) setting_average_amount--;
-      }
-      else if (temp == 'x')
-        break;
-
-      Serial.print(F("Number of readings: "));
-      Serial.println(setting_average_amount);
-    }
+    Serial.print(F("Average amount: "));
+    Serial.println(setting_average_amount);
   }
-
-  //Record this new value to EEPROM
-  record_system_settings();
+  else
+    Serial.println(F("Error: Out of bounds"));
 }
 
 //Configure how many decimals to show
 void decimal_setup(void)
 {
-  Serial.println(F("Press + or a to increase number of decimals"));
-  Serial.println(F("Press - or z to decrease number of decimals"));
-  Serial.println(F("Press x to exit"));
+  //Get user input
+  Serial.print(F("\n\n\rEnter the number of decimals to display (0 to 4): "));
+  char newSetting[8]; //Max 7 characters
+  read_line(newSetting, sizeof(newSetting));
 
-  Serial.print(F("Decimal places: "));
-  Serial.println(setting_decimal_places);
+  int newDecimalPlaces = strtolong(newSetting); //Convert this string to an int
 
-  while (1)
+  //Error check
+  if (newDecimalPlaces >= 0 && newDecimalPlaces <= 4)
   {
-    if (Serial.available())
-    {
-      char temp = Serial.read();
+    setting_decimal_places = newDecimalPlaces;
+    
+    //Record this new value to EEPROM
+    record_system_settings();
 
-      if (temp == '+' || temp == 'a')
-      {
-        if (setting_decimal_places < 4) setting_decimal_places++;
-      }
-      else if (temp == '-' || temp == 'z')
-      {
-        if (setting_decimal_places > 0) setting_decimal_places--;
-      }
-      else if (temp == 'x')
-        break;
-
-      Serial.print(F("Decimal places: "));
-      Serial.println(setting_decimal_places);
-    }
+    Serial.print(F("Decimal places: "));
+    Serial.println(setting_decimal_places);
   }
-
-  //Record this new value to EEPROM
-  record_system_settings();
+  else
+    Serial.println(F("Error: Out of bounds"));
 }
 
 //Configure what baud rate to communicate at
 void baud_setup(void)
 {
-  Serial.print(F("\n\rCurrent rate: "));
+  Serial.print(F("\n\n\rCurrent rate: "));
   Serial.print(setting_uart_speed, DEC);
   Serial.println(F(" bps"));
 
@@ -496,19 +473,19 @@ void rate_setup(void)
   int newReportRate = strtolong(newSetting); //Convert this string to an int
 
   //Error check
-  if(newReportRate > minTime)
+  if (newReportRate > minTime)
   {
     setting_report_rate = newReportRate; //Go to this new time
 
     //Record this new value to EEPROM
     record_system_settings();
-  
+
     Serial.print(F("Time between reports now: "));
     Serial.print(setting_report_rate);
     Serial.println(F("ms"));
   }
   else
-    Serial.println(F("Time out of bounds"));
+    Serial.println(F("Error: Out of bounds"));
 }
 
 //Determine how much time we need between measurements
