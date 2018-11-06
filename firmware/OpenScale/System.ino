@@ -90,7 +90,7 @@ void set_default_settings(void)
   setting_local_temp_enable = true;
 
   //Reset remote temp
-  setting_remote_temp_enable = true;
+  setting_remote_temp_enable = false;
 
   //Reset LED blinking
   setting_status_enable = true;

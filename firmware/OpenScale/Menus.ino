@@ -110,12 +110,8 @@ void system_setup(void)
     //Execute command
     if (command == '1')
     {
-      //This can be used to remove the need to tare the scale.
-      //Useful in permanent scale projects.
-
-      scale.tare(); //Reset the scale to 0
-
       Serial.print(F("\n\rGetting Tare point: "));
+      scale.tare(); //Reset the scale to 0
       setting_tare_point = scale.read_average(10); //Get 10 readings from the HX711 and average them
       Serial.println(setting_tare_point);
 
@@ -364,7 +360,7 @@ void average_reading_setup(void)
   if (newAverageAmount >= 1 && newAverageAmount <= 64)
   {
     setting_average_amount = newAverageAmount;
-    
+
     //Record this new value to EEPROM
     record_system_settings();
 
@@ -389,7 +385,7 @@ void decimal_setup(void)
   if (newDecimalPlaces >= 0 && newDecimalPlaces <= 4)
   {
     setting_decimal_places = newDecimalPlaces;
-    
+
     //Record this new value to EEPROM
     record_system_settings();
 
