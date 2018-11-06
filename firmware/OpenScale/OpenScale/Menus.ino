@@ -115,8 +115,8 @@ void system_setup(void)
 
       scale.tare(); //Reset the scale to 0
 
+      Serial.print(F("\n\rGetting Tare point: "));
       setting_tare_point = scale.read_average(10); //Get 10 readings from the HX711 and average them
-      Serial.print(F("\n\rTare point: "));
       Serial.println(setting_tare_point);
 
       record_system_settings();
@@ -310,14 +310,12 @@ void calibrate_scale(void)
 
   Serial.print(F("Please enter the weight currently sitting on the scale: "));
 
-  while (Serial.available() == false) ; //Wait for user input
+  //Read user input
+  char newSetting[15]; //Max 15 characters: "12.5765" = 8 characters (includes trailing /0)
+  read_line(newSetting, sizeof(newSetting));
 
-  Serial.setTimeout(1000); //Wait for user to press return or stop typing for 1 second
-  float weightOnScale = Serial.parseFloat();
-  //TODO create function here to echo user's typing and allow for backspaces
+  float weightOnScale = atof(newSetting); //Convert this string to a float
   Serial.println();
-
-  while (Serial.available()) Serial.read(); //Clear anything in RX buffer
 
   Serial.print(F("User entered: "));
   Serial.println(weightOnScale, 4);
