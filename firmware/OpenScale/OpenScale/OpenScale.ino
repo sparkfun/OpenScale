@@ -76,8 +76,8 @@
 
 #define FIRMWARE_VERSION "1.2"
 
-const byte statusLED = 13;  //Flashes with each reading
-
+//Global variables
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 long setting_uart_speed; //This is the baud rate that the system runs at, default is 9600. Can be 1,200 to 1,000,000
 byte setting_units; //Lbs or kg?
 unsigned int setting_report_rate;
@@ -96,6 +96,9 @@ boolean setupMode = false; //This is set to true if user presses x
 
 const byte escape_character = 'x'; //This is the ASCII character we look for to break reporting
 const int minimum_powercycle_time = 500; //Anything less than 500 can cause reading problems
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+const byte statusLED = 13;  //Flashes with each reading
 
 HX711 scale(DAT, CLK); //Setup interface to scale
 
@@ -155,20 +158,15 @@ void setup()
 
   Serial.println(F("Readings:"));
 
+//Something odd with power cycling
+  powerUpScale();
+  delay(100); //Something odd with power cycling
 }
 
 void loop()
 {
-  Serial.print("cal: ");
-  Serial.print(setting_calibration_factor);
-  Serial.print(" ");
-
-  Serial.print("avg: ");
-  Serial.print(setting_average_amount);
-  Serial.print(" ");
-
   //Power cycle takes around 400ms so only do so if our report rate is greater than 500ms
-  if (setting_report_rate > minimum_powercycle_time) powerUpScale();
+//Something odd with power cycling  if (setting_report_rate > minimum_powercycle_time) powerUpScale();
 
   long startTime = millis();
 
@@ -225,7 +223,7 @@ void loop()
   Serial.flush();
 
   //This takes time so put it after we have printed the report
-  if (setting_report_rate > minimum_powercycle_time) powerDownScale();
+//Something odd with power cycling  if (setting_report_rate > minimum_powercycle_time) powerDownScale();
 
   //Hang out until the end of this report period
   while (1)
@@ -235,30 +233,28 @@ void loop()
     {
       toggleLED();
       char incoming = Serial.read();
-      if (incoming == escape_character)
-      {
-        //Power cycle takes 400ms so only do so if our report rate is less than 400ms
-        if (setting_report_rate > minimum_powercycle_time) powerUpScale();
-        system_setup();
-        if (setting_report_rate > minimum_powercycle_time) powerDownScale;
-      }
+
       if (setting_status_enable == false) digitalWrite(statusLED, LOW); //Turn off LED
 
-      if (incoming == escape_character) setupMode = true;  //For Trigger Character Feature
+      if (incoming == escape_character) 
+      {
+        setupMode = true;  //For Trigger Character Feature
+        break; //So we can enter the setup menu
+      }
     }
 
     if ((millis() - startTime) >= setting_report_rate) break;
   }
 
   //If we are serially triggered then wait for incoming character
-  if (setting_serial_trigger_enable == true)
+  if (setupMode == false && setting_serial_trigger_enable == true)
   {
     //Power everything down and go to sleep until a char is received
 
-    delay(100); //Give the micro time to clear out the transmit buffer
+//Something odd with power cycling    delay(100); //Give the micro time to clear out the transmit buffer
     //Any less than this and micro doesn't sleep
 
-    powerDownScale();
+//Something odd with power cycling    powerDownScale();
     char incoming = 0;
 
     //Wait for a trigger character or x from user
@@ -281,16 +277,16 @@ void loop()
       if (incoming == escape_character) setupMode = true;
     }
 
-
-    powerUpScale();
+//Something odd with power cycling    powerUpScale();
   }
+
   //If the user has pressed x go into system setup
   if (setupMode == true)
   {
     //Power cycle takes 400ms so only do so if our report rate is less than 400ms
-    if (setting_report_rate > minimum_powercycle_time) powerUpScale();
+//Something odd with power cycling        if (setting_report_rate > minimum_powercycle_time) powerUpScale();
     system_setup();
-    if (setting_report_rate > minimum_powercycle_time) powerDownScale();
+//Something odd with power cycling        if (setting_report_rate > minimum_powercycle_time) powerDownScale();
     setupMode = false;
 
     if (setting_status_enable == false) digitalWrite(statusLED, LOW); //Turn off LED

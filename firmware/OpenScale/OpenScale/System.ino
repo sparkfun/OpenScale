@@ -282,7 +282,6 @@ long readBytes(byte address, byte sizeOfSetting)
   return (setting);
 }
 
-
 //Reads a line until the \n enter character is found
 byte read_line(char* buffer, byte buffer_length)
 {
