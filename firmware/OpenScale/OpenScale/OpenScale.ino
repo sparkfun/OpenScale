@@ -60,6 +60,8 @@
   enter numbers from keyboard rather than +/-
   menu doesn't close on first try?
   remote temp off by default
+  powering the scale down seems to be causing the raw readings to be off
+  
 */
 
 #include "HX711.h" //Original Repository Created by Bodge https://github.com/bogde/HX711
@@ -777,20 +779,19 @@ void calibrate_scale(void)
   while(Serial.available() == false) ; //Wait for user to press key
 
   Serial.print(F("Tare: "));
-  Serial.print(setting_tare_point);
-  Serial.print(F(" "));
+  Serial.println(setting_tare_point);
 
   long rawReading = scale.read_average(setting_average_amount); //Take average reading over a given number of times
   Serial.print(F("Raw: "));
-  Serial.print(rawReading);
-  Serial.print(F(" "));
+  Serial.println(rawReading);
 
   Serial.print(F("Current Reading: "));
   Serial.print(scale.get_units(setting_average_amount), 4); //Show 4 decimals during calibration
-  Serial.print(F(" "));
   if (setting_units == UNITS_LBS) Serial.print(F("lbs"));
   if (setting_units == UNITS_KG) Serial.print(F("kg"));
-  Serial.print(F("   Calibration Factor: "));
+  Serial.println();
+
+  Serial.print(F("Calibration Factor: "));
   Serial.print(setting_calibration_factor);
   Serial.println();
 
@@ -838,55 +839,6 @@ void calibrate_scale(void)
   if (setting_units == UNITS_LBS) Serial.print(F("lbs"));
   if (setting_units == UNITS_KG) Serial.print(F("kg"));
   Serial.println();
-
-  /*if (Serial.available())
-    {
-    //toggledLED(); //Blink serial indicator
-
-    //Check to see if user is holding down the button
-    long delta = millis() - lastChange;
-    lastChange = millis();
-
-    if (delta > 500) //Slow, increment just 1 and reset holdDown counter
-    {
-      changeRate = 1;
-      holdDownCounter = 0;
-    }
-    else //Medium 10 and increment counter
-    {
-      changeRate = 10;
-      holdDownCounter++;
-      if (holdDownCounter > 25)
-      {
-        holdDownCounter = 100; //Don't let this get too big
-        changeRate = 100; //Change faster
-      }
-      else if (holdDownCounter > 10)
-      {
-        changeRate = 100; //Change faster
-      }
-    }
-
-    while (Serial.available())
-    {
-      char incoming = Serial.read();
-
-      if (incoming == '+' || incoming == 'a')
-        setting_calibration_factor += changeRate;
-      else if (incoming == '-' || incoming == 'z')
-        setting_calibration_factor -= changeRate;
-      else if (incoming == '0')
-        setting_calibration_factor = 0;
-      else if (incoming == 'x')
-      {
-        //Record this new value to EEPROM
-        record_system_settings();
-        return;
-      }
-    }
-    }
-    }*/
-
 }
 //Allow user to input the time between readings
 void rate_setup(void)
