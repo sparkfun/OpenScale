@@ -769,84 +769,125 @@ int calcMinimumReadTime(void)
 //Gives user the ability to set a known weight on the scale and calculate a calibration factor
 void calibrate_scale(void)
 {
+  Serial.println();
+  Serial.println();
   Serial.println(F("Scale calibration"));
-  Serial.println(F("Remove all weight from scale"));
-  Serial.println(F("After readings begin, place known weight on scale"));
-  Serial.println(F("Press + or a to increase calibration factor"));
-  Serial.println(F("Press - or z to decrease calibration factor"));
-  Serial.println(F("Press 0 to zero factor"));
-  Serial.println(F("Press x to exit"));
+  Serial.println(F("Place known weight on scale. Press a key when weight is in place and stable."));
 
-  delay(3000); //Delay so user can read instructions
+  while(Serial.available() == false) ; //Wait for user to press key
 
-  long lastChange = millis();
-  int changeRate = 1;
-  int holdDownCounter = 0;
+  Serial.print(F("Tare: "));
+  Serial.print(setting_tare_point);
+  Serial.print(F(" "));
 
-  while (1)
-  {
-    scale.set_scale(setting_calibration_factor); //Adjust to this calibration factor
+  long rawReading = scale.read_average(setting_average_amount); //Take average reading over a given number of times
+  Serial.print(F("Raw: "));
+  Serial.print(rawReading);
+  Serial.print(F(" "));
 
-    Serial.print(F("Reading: ["));
-    Serial.print(scale.get_units(setting_average_amount), 4); //Show 4 decimals during calibration
-    //Serial.print(scale.get_units(setting_average_amount), setting_decimal_places);
-    Serial.print(F(" "));
-    if (setting_units == UNITS_LBS) Serial.print(F("lbs"));
-    if (setting_units == UNITS_KG) Serial.print(F("kg"));
-    Serial.print(F("]   Calibration Factor: "));
-    Serial.print(setting_calibration_factor);
-    Serial.println();
+  Serial.print(F("Current Reading: "));
+  Serial.print(scale.get_units(setting_average_amount), 4); //Show 4 decimals during calibration
+  Serial.print(F(" "));
+  if (setting_units == UNITS_LBS) Serial.print(F("lbs"));
+  if (setting_units == UNITS_KG) Serial.print(F("kg"));
+  Serial.print(F("   Calibration Factor: "));
+  Serial.print(setting_calibration_factor);
+  Serial.println();
 
-    if (Serial.available())
+  while(Serial.available()) Serial.read(); //Clear anything in RX buffer
+
+  Serial.print(F("Please enter the weight currently sitting on the scale: "));
+
+  while (Serial.available() == false) ; //Wait for user input
+
+  Serial.setTimeout(1000); //Wait for user to press return or stop typing for 1 second
+  float weightOnScale = Serial.parseFloat();
+  //TODO create function here to echo user's typing and allow for backspaces
+  Serial.println();
+
+  while(Serial.available()) Serial.read(); //Clear anything in RX buffer
+
+  Serial.print(F("User entered: "));
+  Serial.println(weightOnScale, 4);
+
+  //Convert this weight to a calibration factor
+
+  //tare: 210193
+  //raw: 246177
+  //User Input: 0.5276 kg
+  //avg: 4 times
+
+  //get_units = (raw-OFFSET) / calibration_factor
+  //0.5276 = (246177-210193) / cal_factor
+  //114185 / .45 = 256744
+
+  setting_calibration_factor = (rawReading - setting_tare_point) / weightOnScale;
+
+  Serial.print(F("New Calibration Factor: "));
+  Serial.print(setting_calibration_factor);
+  Serial.println();
+
+  scale.set_scale(setting_calibration_factor); //Go to this new cal factor
+
+  //Record this new value to EEPROM
+  record_system_settings();
+
+  Serial.print(F("New Scale Reading: "));
+  Serial.print(scale.get_units(setting_average_amount), 4); //Show 4 decimals during calibration
+  Serial.print(F(" "));
+  if (setting_units == UNITS_LBS) Serial.print(F("lbs"));
+  if (setting_units == UNITS_KG) Serial.print(F("kg"));
+  Serial.println();
+
+  /*if (Serial.available())
     {
-      //toggledLED(); //Blink serial indicator
+    //toggledLED(); //Blink serial indicator
 
-      //Check to see if user is holding down the button
-      long delta = millis() - lastChange;
-      lastChange = millis();
+    //Check to see if user is holding down the button
+    long delta = millis() - lastChange;
+    lastChange = millis();
 
-      if (delta > 500) //Slow, increment just 1 and reset holdDown counter
+    if (delta > 500) //Slow, increment just 1 and reset holdDown counter
+    {
+      changeRate = 1;
+      holdDownCounter = 0;
+    }
+    else //Medium 10 and increment counter
+    {
+      changeRate = 10;
+      holdDownCounter++;
+      if (holdDownCounter > 25)
       {
-        changeRate = 1;
-        holdDownCounter = 0;
+        holdDownCounter = 100; //Don't let this get too big
+        changeRate = 100; //Change faster
       }
-      else //Medium 10 and increment counter
+      else if (holdDownCounter > 10)
       {
-        changeRate = 10;
-        holdDownCounter++;
-        if (holdDownCounter > 25)
-        {
-          holdDownCounter = 100; //Don't let this get too big
-          changeRate = 100; //Change faster
-        }
-        else if (holdDownCounter > 10)
-        {
-          changeRate = 100; //Change faster
-        }
-      }
-
-      while (Serial.available())
-      {
-        char temp = Serial.read();
-
-        if (temp == '+' || temp == 'a')
-          setting_calibration_factor += changeRate;
-        else if (temp == '-' || temp == 'z')
-          setting_calibration_factor -= changeRate;
-        else if (temp == '0')
-          setting_calibration_factor = 0;
-        else if (temp == 'x')
-        {
-          //Record this new value to EEPROM
-          record_system_settings();
-          return;
-        }
+        changeRate = 100; //Change faster
       }
     }
-  }
+
+    while (Serial.available())
+    {
+      char incoming = Serial.read();
+
+      if (incoming == '+' || incoming == 'a')
+        setting_calibration_factor += changeRate;
+      else if (incoming == '-' || incoming == 'z')
+        setting_calibration_factor -= changeRate;
+      else if (incoming == '0')
+        setting_calibration_factor = 0;
+      else if (incoming == 'x')
+      {
+        //Record this new value to EEPROM
+        record_system_settings();
+        return;
+      }
+    }
+    }
+    }*/
 
 }
-
 //Allow user to input the time between readings
 void rate_setup(void)
 {
