@@ -92,7 +92,7 @@ const int minimum_powercycle_time = 500; //Anything less than 500 can cause read
 
 const byte statusLED = 13;  //Flashes with each reading
 
-HX711 scale(DAT, CLK); //Setup interface to scale
+HX711 scale; //Setup interface to scale
 
 OneWire remoteSensor(4);  //Setup reading one wire temp sensor on pin 4 (a 4.7K resistor is necessary)
 byte remoteSensorAddress[8];
@@ -101,6 +101,8 @@ boolean remoteSensorAttached = false;
 void setup()
 {
   pinMode(statusLED, OUTPUT);
+
+  scale.begin(DAT, CLK);
 
   //Power down various bits of hardware to lower power usage
   set_sleep_mode(SLEEP_MODE_IDLE);
