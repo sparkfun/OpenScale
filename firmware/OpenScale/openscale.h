@@ -29,6 +29,15 @@
 #define LOCATION_SERIAL_TRIGGER_ENABLE          (LOCATION_MASS_UNITS + 21)
 #define LOCATION_RAW_READING_ENABLE             (LOCATION_MASS_UNITS + 22)
 #define LOCATION_TRIGGER_CHARACTER              (LOCATION_MASS_UNITS + 23)
+#define LOCATION_CHECKSUM_MSB                   (LOCATION_MASS_UNITS + 24)
+#define LOCATION_CHECKSUM_LSB                   (LOCATION_MASS_UNITS + 25)
+
+//The checksum covers every setting from LOCATION_SETTINGS_START up to, but not including, the checksum itself
+#define LOCATION_SETTINGS_START                 LOCATION_MASS_UNITS
+#define LOCATION_SETTINGS_END                   LOCATION_CHECKSUM_MSB
+
+//An erased EEPROM reads as 0xFF, so this is what firmware older than the checksum left behind
+#define CHECKSUM_NOT_PRESENT                    0xFFFF
 
 //Arduino doesn't properly handle bauds lower than 500bps
 #define BAUD_MIN  1200

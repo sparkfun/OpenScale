@@ -138,12 +138,40 @@ void record_system_settings(void)
   EEPROM.write(LOCATION_RAW_READING_ENABLE, setting_raw_reading_enable);
 
   EEPROM.write(LOCATION_TRIGGER_CHARACTER, setting_trigger_character);
+
+  //Checksum what was actually stored so that corruption can be detected at the next power up
+  writeBytes(LOCATION_CHECKSUM_MSB, calcSettingsChecksum(), sizeof(unsigned int));
+}
+
+//Calculate the CRC16 of the settings as they are currently stored in EEPROM
+unsigned int calcSettingsChecksum(void)
+{
+  unsigned int crc = 0xFFFF;
+
+  for (byte x = LOCATION_SETTINGS_START ; x < LOCATION_SETTINGS_END ; x++)
+    crc = _crc16_update(crc, EEPROM.read(x));
+
+  return (crc);
 }
 
 //Reads the current system settings from EEPROM
 //If anything looks weird, reset setting to default value
 void readSystemSettings(void)
 {
+  //Check that the settings have not been corrupted since they were recorded.
+  //A setting can be corrupt and still be within its legal range, for example a baud rate
+  //that no computer can match, so if the checksum is wrong we don't trust any of them.
+  unsigned int storedChecksum = readBytes(LOCATION_CHECKSUM_MSB, sizeof(storedChecksum));
+  if (storedChecksum != CHECKSUM_NOT_PRESENT && storedChecksum != calcSettingsChecksum())
+  {
+    set_default_settings();
+    return;
+  }
+
+  //If there is no checksum then either the EEPROM is blank or the settings were recorded
+  //by older firmware. Check each setting on its own, as that firmware did, then add the
+  //checksum once we are done.
+
   //Read what the current UART speed is from EEPROM memory
   setting_uart_speed = readBytes(LOCATION_BAUD_MSB, sizeof(setting_uart_speed));
   if (setting_uart_speed < BAUD_MIN || setting_uart_speed > BAUD_MAX)
@@ -255,6 +283,8 @@ void readSystemSettings(void)
     setting_trigger_character = '!'; //Default to !
     EEPROM.write(LOCATION_TRIGGER_CHARACTER, setting_trigger_character);
   }
+
+  if (storedChecksum == CHECKSUM_NOT_PRESENT) record_system_settings();
 
 }
 
