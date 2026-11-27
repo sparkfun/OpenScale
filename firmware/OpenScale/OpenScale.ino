@@ -55,6 +55,9 @@
   to text enter. Now you can calibrate your system by typing in '0.5762' and OpenScale
   will figure out all the calibration factors.
   * Fixed a bug with the EEPROM defaulting to the wrong values
+  v1.3 -
+  * Added a checksum to the settings stored in EEPROM. If the settings are found
+  to be corrupt at power up then they are all reset to their defaults.
 */
 
 #include "HX711.h" //Original Repository Created by Bodge https://github.com/bogde/HX711
@@ -65,8 +68,9 @@
 
 #include <avr/sleep.h> //Needed for sleep_mode
 #include <avr/power.h> //Needed for powering down perihperals such as the ADC/TWI and Timers
+#include <util/crc16.h> //Needed to checksum the user settings
 
-#define FIRMWARE_VERSION "1.2"
+#define FIRMWARE_VERSION "1.3"
 
 //Global variables
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
